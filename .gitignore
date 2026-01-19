@@ -13,3 +13,4 @@ coverage
 # cu-tool generated cache / artifacts
 api/data/html/
 tmp-url.csv
+api/data/*.db
