@@ -1,0 +1,28 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+
+  "eslint.validate": ["javascript", "typescript"],
+
+  "files.eol": "\n",
+  "files.insertFinalNewline": true,
+
+  "markdownlint.run": "onSave",
+
+  "typescript.tsdk": "node_modules/typescript/lib",
+
+  "editor.inlineSuggest.enabled": true,
+  "sqltools.useNodeRuntime": true,
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "driver": "SQLite",
+      "name": "cu-tools",
+      "database": "${workspaceFolder:cu-tool}/api/data/cu-tool.db"
+    }
+  ]
+}

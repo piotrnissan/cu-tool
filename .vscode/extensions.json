@@ -1,0 +1,21 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "eamodio.gitlens",
+    "EditorConfig.EditorConfig",
+
+    "yzhang.markdown-all-in-one",
+    "DavidAnson.vscode-markdownlint",
+
+    "alexcvzz.vscode-sqlite",
+
+    "humao.rest-client",
+
+    "pulkitgangwar.nextjs-snippets",
+
+    "ms-playwright.playwright",
+
+    "usernamehw.errorlens"
+  ]
+}

@@ -1,0 +1,746 @@
+import { JSDOM } from "jsdom";
+
+export interface ComponentDetection {
+  componentKey: string;
+  instanceCount: number;
+  confidence: "high" | "medium" | "low";
+  evidence: string;
+}
+
+/**
+ * Global chrome exclusion selectors
+ * Apply to all detectors to filter out non-content elements
+ */
+const GLOBAL_CHROME_EXCLUSIONS = [
+  // Header/nav
+  "header",
+  "nav",
+  ".meganav-container",
+  '[class*="c_010D"]',
+
+  // Modal dialogs
+  '[role="dialog"][aria-modal="true"]',
+
+  // Footer (contentinfo role only)
+  '[role="contentinfo"]',
+
+  // Cookie/consent overlays
+  "#onetrust-consent-sdk",
+  '[id*="onetrust"]',
+  '[class*="onetrust"]',
+  '[class*="cookie-banner"]',
+  '[class*="consent"]',
+];
+
+/**
+ * AEM layout wrapper patterns to avoid counting as component containers
+ * Check with matches(), not closest()
+ */
+const AEM_LAYOUT_WRAPPERS = [
+  ".responsivegrid",
+  ".aem-Grid",
+  '[class*="aem-Grid"]',
+  ".aem-GridColumn",
+  ".parsys",
+  ".grid-row.bleed",
+  ".dummy-parent-class",
+];
+
+/**
+ * Get content root element (fallback chain for non-semantic HTML)
+ */
+function getContentRoot(doc: Document): Element {
+  const candidates = [
+    doc.querySelector("main"),
+    doc.querySelector('[role="main"]'),
+    doc.querySelector("article"),
+    doc.querySelector("#main"),
+    doc.querySelector("#content"),
+    doc.querySelector("#page"),
+    doc.querySelector("#container"),
+  ];
+
+  for (const candidate of candidates) {
+    if (candidate) return candidate;
+  }
+
+  return doc.body;
+}
+
+/**
+ * Check if element is in global chrome context
+ */
+function isInGlobalChrome(element: Element): boolean {
+  return GLOBAL_CHROME_EXCLUSIONS.some((selector) => {
+    try {
+      return element.closest(selector) !== null;
+    } catch {
+      return false;
+    }
+  });
+}
+
+/**
+ * Check if element itself is an AEM layout wrapper
+ */
+function isAEMLayoutWrapper(element: Element): boolean {
+  return AEM_LAYOUT_WRAPPERS.some((selector) => {
+    try {
+      return element.matches(selector);
+    } catch {
+      return false;
+    }
+  });
+}
+
+/**
+ * Detects tabs component (role="tablist" + role="tab" patterns)
+ * Filters out global navigation tabs and requires valid tab panels in content
+ */
+function detectTabs(dom: JSDOM): ComponentDetection | null {
+  const doc = dom.window.document;
+  const tablists = doc.querySelectorAll('[role="tablist"]');
+
+  if (tablists.length === 0) return null;
+
+  const contentRoot = getContentRoot(doc);
+  const validTablists: Array<{ tabs: number; panels: number }> = [];
+
+  tablists.forEach((tablist) => {
+    // Exclude global chrome
+    if (isInGlobalChrome(tablist)) return;
+
+    // Require inside content root
+    if (!contentRoot.contains(tablist)) return;
+
+    // Require real tab panels
+    const tabs = tablist.querySelectorAll('[role="tab"]');
+    if (tabs.length === 0) return;
+
+    let validPanelsCount = 0;
+
+    tabs.forEach((tab) => {
+      const ariaControls = tab.getAttribute("aria-controls");
+      if (!ariaControls) return;
+
+      const panel = doc.getElementById(ariaControls);
+      if (!panel) return;
+
+      // Check if panel is valid (has role=tabpanel OR meaningful content)
+      const hasTabpanelRole = panel.getAttribute("role") === "tabpanel";
+      const hasContent = (panel.textContent?.trim().length || 0) >= 50;
+
+      if (hasTabpanelRole || hasContent) {
+        validPanelsCount++;
+      }
+    });
+
+    // Only count this tablist if it has at least one valid panel
+    if (validPanelsCount > 0) {
+      validTablists.push({ tabs: tabs.length, panels: validPanelsCount });
+    }
+  });
+
+  if (validTablists.length === 0) return null;
+
+  // Calculate evidence
+  const firstTablist = validTablists[0];
+  const evidence = `tabs: ${firstTablist.tabs} tabs, ${firstTablist.panels} panels (in content)`;
+
+  return {
+    componentKey: "tabs",
+    instanceCount: validTablists.length,
+    confidence: "high",
+    evidence,
+  };
+}
+
+/**
+ * Detects accordion component (details/summary OR aria-expanded patterns)
+ */
+function detectAccordion(dom: JSDOM): ComponentDetection | null {
+  const doc = dom.window.document;
+  const contentRoot = getContentRoot(doc);
+
+  // Method 1: Native details/summary
+  const detailsElements = Array.from(doc.querySelectorAll("details")).filter(
+    (el) => {
+      return !isInGlobalChrome(el) && contentRoot.contains(el);
+    }
+  );
+
+  if (detailsElements.length >= 3) {
+    return {
+      componentKey: "accordion",
+      instanceCount: 1,
+      confidence: "high",
+      evidence: `<details> accordion: ${detailsElements.length} items`,
+    };
+  }
+
+  // Method 2: ARIA accordion pattern
+  const ariaExpanded = Array.from(
+    doc.querySelectorAll("[aria-expanded]")
+  ).filter((el) => {
+    // Exclude global chrome
+    if (isInGlobalChrome(el)) return false;
+
+    // Require inside content root
+    if (!contentRoot.contains(el)) return false;
+
+    // REQUIRE aria-controls pointing to panel
+    const controls = el.getAttribute("aria-controls");
+    if (!controls) return false;
+
+    const panel = doc.getElementById(controls);
+    if (!panel) return false;
+
+    // Panel must have meaningful content (not empty layout wrapper)
+    const hasContent = (panel.textContent?.trim().length || 0) >= 50;
+    return hasContent;
+  });
+
+  if (ariaExpanded.length >= 5) {
+    return {
+      componentKey: "accordion",
+      instanceCount: 1,
+      confidence: "medium",
+      evidence: `ARIA accordion: ${ariaExpanded.length} items (in content)`,
+    };
+  }
+
+  return null;
+}
+
+/**
+ * Detects anchor navigation (in-page nav with href="#..." patterns)
+ */
+function detectAnchorNav(dom: JSDOM): ComponentDetection | null {
+  const doc = dom.window.document;
+  const contentRoot = getContentRoot(doc);
+
+  // Find nav/list elements inside content root
+  const candidates: Element[] = [];
+
+  contentRoot.querySelectorAll("nav, ul, ol").forEach((container) => {
+    // Exclude global chrome
+    if (isInGlobalChrome(container)) return;
+
+    const anchorLinks = container.querySelectorAll('a[href^="#"]');
+    if (anchorLinks.length < 3) return;
+
+    // Verify at least 50% of anchor targets exist in the DOM
+    const validAnchors = Array.from(anchorLinks).filter((link) => {
+      const href = link.getAttribute("href");
+      if (!href || href === "#") return false;
+      const targetId = href.slice(1);
+      return doc.getElementById(targetId) !== null;
+    });
+
+    if (validAnchors.length >= 3) {
+      candidates.push(container);
+    }
+  });
+
+  if (candidates.length === 0) return null;
+
+  const totalAnchors = candidates.reduce((sum, el) => {
+    return sum + el.querySelectorAll('a[href^="#"]').length;
+  }, 0);
+
+  return {
+    componentKey: "anchor_nav",
+    instanceCount: candidates.length,
+    confidence: "high",
+    evidence: `${candidates.length} in-page nav(s) with ${totalAnchors} anchors (in content)`,
+  };
+}
+
+/**
+ * Helper: Check if element has carousel navigation/pagination controls
+ */
+function hasCarouselControls(element: Element): boolean {
+  const controls = element.querySelectorAll(
+    ".swiper-pagination, .slick-dots, " +
+      '[class*="pagination"], [class*="dots"], ' +
+      'button[aria-label*="next" i], button[aria-label*="prev" i], ' +
+      '[class*="prev"], [class*="next"], [class*="arrow"]'
+  );
+  return controls.length >= 1;
+}
+
+/**
+ * Helper: Get DOM depth of an element
+ */
+function getDOMDepth(element: Element): number {
+  let depth = 0;
+  let current = element.parentElement;
+  while (current) {
+    depth++;
+    current = current.parentElement;
+  }
+  return depth;
+}
+
+/**
+ * Detects image carousel (slider-like containers with navigation controls)
+ * Hardened with robust nested deduplication
+ */
+function detectImageCarousel(dom: JSDOM): ComponentDetection | null {
+  const doc = dom.window.document;
+  const contentRoot = getContentRoot(doc);
+
+  // Step 1: Collect raw candidates
+  const rawCandidates: Element[] = [];
+  const carouselKeywords = [
+    "carousel",
+    "slider",
+    "slideshow",
+    "swiper",
+    "slick",
+  ];
+
+  // Method 1: Keyword-based
+  carouselKeywords.forEach((keyword) => {
+    const elements = contentRoot.querySelectorAll(
+      `[class*="${keyword}"], [id*="${keyword}"], [data-component*="${keyword}"]`
+    );
+
+    elements.forEach((el) => {
+      if (isInGlobalChrome(el)) return;
+      if (isAEMLayoutWrapper(el)) return;
+      if (!rawCandidates.includes(el)) {
+        rawCandidates.push(el);
+      }
+    });
+  });
+
+  // Method 2: Control-based (containers with carousel controls)
+  const controlSelectors = [
+    ".swiper-pagination",
+    ".slick-dots",
+    '[class*="pagination"]',
+    '[class*="dots"]',
+  ];
+
+  controlSelectors.forEach((selector) => {
+    const controls = contentRoot.querySelectorAll(selector);
+    controls.forEach((control) => {
+      const container = control.parentElement;
+      if (!container) return;
+      if (isInGlobalChrome(container)) return;
+      if (isAEMLayoutWrapper(container)) return;
+      if (!rawCandidates.includes(container)) {
+        rawCandidates.push(container);
+      }
+    });
+  });
+
+  if (rawCandidates.length === 0) return null;
+
+  // Step 2: Robust nested deduplication (outermost-only)
+  // Sort by DOM depth (outermost first)
+  const sortedCandidates = rawCandidates.sort(
+    (a, b) => getDOMDepth(a) - getDOMDepth(b)
+  );
+
+  const deduped: Element[] = [];
+  sortedCandidates.forEach((candidate) => {
+    // Accept only if NOT contained by any already-accepted candidate
+    const isNested = deduped.some((accepted) => accepted.contains(candidate));
+    if (!isNested) {
+      deduped.push(candidate);
+    }
+  });
+
+  // Step 3: Apply acceptance rules
+  const imageCarousels: Array<{ element: Element; imageCount: number }> = [];
+
+  deduped.forEach((container) => {
+    // Require >=2 images
+    const images = container.querySelectorAll("img, picture img");
+    if (images.length < 2) return;
+
+    // Require >=1 nav/pagination control
+    if (!hasCarouselControls(container)) return;
+
+    // Reject single-image hero patterns (if only 1 unique image)
+    const uniqueImages = new Set<string>();
+    images.forEach((img) => {
+      const src = img.getAttribute("src") || img.getAttribute("data-src") || "";
+      if (src) uniqueImages.add(src);
+    });
+    if (uniqueImages.size < 2) return;
+
+    imageCarousels.push({ element: container, imageCount: images.length });
+  });
+
+  if (imageCarousels.length === 0) return null;
+
+  const itemCounts = imageCarousels.map((c) => c.imageCount);
+  const evidence = `image_carousel: ${imageCarousels.length} (deduped), items=[${itemCounts.join(",")}], controls=yes`;
+
+  return {
+    componentKey: "image_carousel",
+    instanceCount: imageCarousels.length,
+    confidence: "medium",
+    evidence,
+  };
+}
+
+/**
+ * Helper: Check if element has horizontal scrolling carousel characteristics
+ */
+function isScrollableCarousel(element: Element): boolean {
+  const computedStyle = element.getAttribute("style") || "";
+  const className = element.className || "";
+
+  // Check for overflow-x or scroll-snap
+  if (
+    computedStyle.includes("overflow-x") ||
+    computedStyle.includes("scroll-snap") ||
+    className.includes("scroll") ||
+    className.includes("snap")
+  ) {
+    return true;
+  }
+
+  // Check for ARIA carousel role
+  if (element.getAttribute("role") === "region") {
+    const ariaDesc = element.getAttribute("aria-roledescription");
+    if (ariaDesc && ariaDesc.toLowerCase().includes("carousel")) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
+ * Detects card carousel (repeated card items with navigation)
+ * Hardened with robust nested deduplication and structural validation
+ * Loosened card-like validation to reduce false negatives
+ */
+function detectCardCarousel(dom: JSDOM): ComponentDetection | null {
+  const doc = dom.window.document;
+  const contentRoot = getContentRoot(doc);
+
+  // Step 1: Collect raw candidates
+  const rawCandidates: Element[] = [];
+  const carouselKeywords = ["carousel", "slider", "swiper", "slick"];
+
+  carouselKeywords.forEach((keyword) => {
+    const elements = contentRoot.querySelectorAll(
+      `[class*="${keyword}"], [id*="${keyword}"], [data-component*="${keyword}"]`
+    );
+
+    elements.forEach((el) => {
+      if (isInGlobalChrome(el)) return;
+      if (isAEMLayoutWrapper(el)) return;
+      if (!rawCandidates.includes(el)) {
+        rawCandidates.push(el);
+      }
+    });
+  });
+
+  // Also look for containers with carousel controls
+  const controlSelectors = [
+    ".swiper-pagination",
+    ".slick-dots",
+    '[class*="pagination"]',
+    '[class*="dots"]',
+  ];
+
+  controlSelectors.forEach((selector) => {
+    const controls = contentRoot.querySelectorAll(selector);
+    controls.forEach((control) => {
+      const container = control.parentElement;
+      if (!container) return;
+      if (isInGlobalChrome(container)) return;
+      if (isAEMLayoutWrapper(container)) return;
+      if (!rawCandidates.includes(container)) {
+        rawCandidates.push(container);
+      }
+    });
+  });
+
+  if (rawCandidates.length === 0) return null;
+
+  // Step 2: Robust nested deduplication (outermost-only)
+  const sortedCandidates = rawCandidates.sort(
+    (a, b) => getDOMDepth(a) - getDOMDepth(b)
+  );
+
+  const deduped: Element[] = [];
+  sortedCandidates.forEach((candidate) => {
+    const isNested = deduped.some((accepted) => accepted.contains(candidate));
+    if (!isNested) {
+      deduped.push(candidate);
+    }
+  });
+
+  // Step 3: Apply acceptance rules (loosened structural validation)
+  const cardCarousels: Array<{
+    element: Element;
+    cardCount: number;
+    hasControls: boolean;
+    isScrollable: boolean;
+  }> = [];
+
+  deduped.forEach((container) => {
+    // Loosened card-like item validation:
+    // Look for card-like items (direct children OR deeper descendants)
+    // - Each item must have: link (a[href]) AND (heading h2-h6 OR media)
+
+    // Try direct children first
+    let cardLikeItems = Array.from(container.children).filter((child) => {
+      const hasLink = child.querySelector("a[href]") !== null;
+      if (!hasLink) return false;
+
+      const hasHeading =
+        child.querySelector("h2, h3, h4, h5, h6") !== null ||
+        child.querySelector('[role="heading"]') !== null;
+
+      const hasImage =
+        child.querySelector("img, picture, svg") !== null ||
+        child.querySelector('[role="img"]') !== null ||
+        child.querySelector("[data-src]") !== null ||
+        child.querySelector("[data-lazy]") !== null;
+
+      return hasHeading || hasImage;
+    });
+
+    // Fallback: if direct children don't match, look for items with common carousel item classes
+    if (cardLikeItems.length < 2) {
+      const itemSelectors = [
+        '[class*="card"]',
+        '[class*="item"]',
+        '[class*="slide"]',
+        '[class*="tile"]',
+      ];
+
+      itemSelectors.forEach((selector) => {
+        const items = Array.from(container.querySelectorAll(selector)).filter(
+          (item) => {
+            // Must be relatively direct (not too deeply nested)
+            let parent = item.parentElement;
+            let depth = 0;
+            while (parent && parent !== container && depth < 5) {
+              parent = parent.parentElement;
+              depth++;
+            }
+            if (parent !== container) return false;
+
+            const hasLink = item.querySelector("a[href]") !== null;
+            if (!hasLink) return false;
+
+            const hasHeading =
+              item.querySelector("h2, h3, h4, h5, h6") !== null ||
+              item.querySelector('[role="heading"]') !== null;
+
+            const hasImage =
+              item.querySelector("img, picture, svg") !== null ||
+              item.querySelector('[role="img"]') !== null ||
+              item.querySelector("[data-src]") !== null;
+
+            return hasHeading || hasImage;
+          }
+        );
+
+        if (items.length > cardLikeItems.length) {
+          cardLikeItems = items;
+        }
+      });
+    }
+
+    if (cardLikeItems.length < 2) return;
+
+    // Controls requirement with scrollable fallback
+    const hasControls = hasCarouselControls(container);
+    const isScrollable = isScrollableCarousel(container);
+
+    if (!hasControls && !isScrollable) return;
+
+    cardCarousels.push({
+      element: container,
+      cardCount: cardLikeItems.length,
+      hasControls,
+      isScrollable,
+    });
+  });
+
+  if (cardCarousels.length === 0) return null;
+
+  const itemCounts = cardCarousels.map((c) => c.cardCount);
+  const controlTypes = cardCarousels
+    .map((c) => (c.hasControls ? "controls" : "scrollable"))
+    .join(",");
+
+  const evidence = `card_carousel: ${cardCarousels.length} (deduped), items=[${itemCounts.join(",")}], ${controlTypes}`;
+
+  return {
+    componentKey: "card_carousel",
+    instanceCount: cardCarousels.length,
+    confidence: "medium",
+    evidence,
+  };
+}
+
+/**
+ * Check if element is a card-like item (structural heuristic)
+ * Must have: link + visual media + heading
+ */
+function isCardLikeItem(element: Element): boolean {
+  // Must contain a link
+  const hasLink = element.querySelector("a[href]") !== null;
+  if (!hasLink) return false;
+
+  // Must contain visual media
+  const hasMedia =
+    element.querySelector("img") !== null ||
+    element.querySelector("picture") !== null ||
+    element.querySelector("svg") !== null ||
+    element.querySelector('[role="img"]') !== null;
+  if (!hasMedia) return false;
+
+  // Must contain heading-like element
+  const hasHeading =
+    element.querySelector("h2, h3, h4") !== null ||
+    element.querySelector('[role="heading"]') !== null;
+  if (!hasHeading) return false;
+
+  return true;
+}
+
+/**
+ * Detects cards/listing sections (content sections with multiple card-like items)
+ * AEM uses "grid" for layout scaffolding, so we count card/listing sections instead.
+ */
+function detectCardsSection(dom: JSDOM): ComponentDetection | null {
+  const doc = dom.window.document;
+  const contentRoot = getContentRoot(doc);
+
+  const candidates: Element[] = [];
+
+  // Search for potential container elements
+  contentRoot
+    .querySelectorAll("div, section, ul, ol, article")
+    .forEach((container) => {
+      if (isInGlobalChrome(container)) return;
+      if (isAEMLayoutWrapper(container)) return; // Skip AEM wrappers as candidates
+
+      // Count direct children that are card-like
+      const cardLikeChildren = Array.from(container.children).filter((child) =>
+        isCardLikeItem(child)
+      );
+
+      if (cardLikeChildren.length >= 3) {
+        candidates.push(container);
+      }
+    });
+
+  if (candidates.length === 0) return null;
+
+  // Deduplicate nested: keep only outermost
+  const outermost = candidates.filter((candidate) => {
+    const hasParent = candidates.some(
+      (other) => other !== candidate && other.contains(candidate)
+    );
+    return !hasParent;
+  });
+
+  if (outermost.length === 0) return null;
+
+  // Gather items_per_section for evidence
+  const itemsPerSection = outermost.map((section) => {
+    const cardLikeChildren = Array.from(section.children).filter((child) =>
+      isCardLikeItem(child)
+    );
+    return cardLikeChildren.length;
+  });
+
+  const evidence = `cards_section: ${outermost.length} sections, items_per_section=[${itemsPerSection.join(",")}]`;
+
+  return {
+    componentKey: "cards_section",
+    instanceCount: outermost.length,
+    confidence: "medium",
+    evidence,
+  };
+}
+
+/**
+ * Detects icon grid (repeated icon+text items)
+ */
+function detectIconGrid(dom: JSDOM): ComponentDetection | null {
+  const doc = dom.window.document;
+  const contentRoot = getContentRoot(doc);
+
+  const iconKeywords = ["icon", "feature", "benefit"];
+  const possibleIconContainers: Element[] = [];
+
+  iconKeywords.forEach((keyword) => {
+    const elements = doc.querySelectorAll(`[class*="${keyword}"]`);
+    elements.forEach((el) => {
+      if (isInGlobalChrome(el)) return;
+      if (!contentRoot.contains(el)) return;
+      if (isAEMLayoutWrapper(el)) return;
+
+      if (el.children.length >= 3 && !possibleIconContainers.includes(el)) {
+        possibleIconContainers.push(el);
+      }
+    });
+  });
+
+  // Verify items have icon + text structure
+  const iconGrids = possibleIconContainers.filter((container) => {
+    const items = Array.from(container.children);
+    const itemsWithIconAndText = items.filter((item) => {
+      const hasIcon = item.querySelector('svg, img, [class*="icon"]');
+      const hasText = (item.textContent?.trim().length || 0) >= 10;
+      return hasIcon && hasText;
+    });
+
+    return itemsWithIconAndText.length >= 3;
+  });
+
+  if (iconGrids.length === 0) return null;
+
+  return {
+    componentKey: "icon_grid",
+    instanceCount: iconGrids.length,
+    confidence: "medium",
+    evidence: `${iconGrids.length} icon grid(s) with icon+text items`,
+  };
+}
+
+/**
+ * Main analysis function: runs all detectors
+ */
+export function analyzeComponents(html: string): ComponentDetection[] {
+  const dom = new JSDOM(html);
+  const detections: ComponentDetection[] = [];
+
+  const detectors = [
+    detectTabs,
+    detectAccordion,
+    detectAnchorNav,
+    detectImageCarousel,
+    detectCardCarousel,
+    detectCardsSection, // Renamed from detectCardsGrid
+    detectIconGrid,
+  ];
+
+  detectors.forEach((detector) => {
+    try {
+      const result = detector(dom);
+      if (result) {
+        detections.push(result);
+      }
+    } catch (error) {
+      console.error(`Detector ${detector.name} failed:`, error);
+    }
+  });
+
+  return detections;
+}

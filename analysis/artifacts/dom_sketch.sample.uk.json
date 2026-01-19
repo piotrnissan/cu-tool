@@ -1,0 +1,1872 @@
+[
+  {
+    "id": "1",
+    "file": "data/html/UK/1.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 7,
+      "details": 0,
+      "anchors_hash": 8,
+      "dialogs_modal": 1,
+      "responsivegrid": 0,
+      "aem_grid": 0
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "div.grid-row",
+        "div.editorialInPageNavigation",
+        "div.freeEditorial.freeEditorialParsys.parsys"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 5,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 11,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 8,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 0,
+      "responsivegrid": 0
+    }
+  },
+  {
+    "id": "12",
+    "file": "data/html/UK/12.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 7,
+      "details": 0,
+      "anchors_hash": 34,
+      "dialogs_modal": 1,
+      "responsivegrid": 1,
+      "aem_grid": 26
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "script",
+        "script",
+        "script",
+        "script",
+        "script",
+        "script",
+        "div.grid-row.bleed",
+        "div.grid-row",
+        "div.dummy-parent-class"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 5,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 4,
+      "slider": 49,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 11,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 38,
+      "cards": 0,
+      "card": 82,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 26,
+      "responsivegrid": 1
+    }
+  },
+  {
+    "id": "125",
+    "file": "data/html/UK/125.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 15,
+      "details": 0,
+      "anchors_hash": 15,
+      "dialogs_modal": 1,
+      "responsivegrid": 1,
+      "aem_grid": 14
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "script",
+        "script",
+        "script",
+        "script",
+        "script",
+        "div.grid-row.bleed",
+        "div.grid-row",
+        "div.root.responsivegrid"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 5,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 1,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 11,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 23,
+      "cards": 1,
+      "card": 48,
+      "tiles": 0,
+      "items": 1,
+      "aem-grid": 14,
+      "responsivegrid": 1
+    }
+  },
+  {
+    "id": "15",
+    "file": "data/html/UK/15.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 8,
+      "details": 0,
+      "anchors_hash": 8,
+      "dialogs_modal": 1,
+      "responsivegrid": 0,
+      "aem_grid": 0
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "script",
+        "div.vlpplus-modal-page"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 6,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 9,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 24,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 24,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 0,
+      "responsivegrid": 0
+    }
+  },
+  {
+    "id": "167",
+    "file": "data/html/UK/167.html.gz",
+    "counts": {
+      "tablist": 3,
+      "tab": 10,
+      "tabpanel": 5,
+      "aria_expanded": 12,
+      "details": 0,
+      "anchors_hash": 18,
+      "dialogs_modal": 1,
+      "responsivegrid": 0,
+      "aem_grid": 0
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "div",
+        "div.grid-row",
+        "div.freeEditorial.freeEditorialParsys.parsys",
+        "script"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 6,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 14,
+      "tabs": 9,
+      "tablist": 3,
+      "tabpanel": 5,
+      "grid": 21,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 0,
+      "responsivegrid": 0
+    }
+  },
+  {
+    "id": "2",
+    "file": "data/html/UK/2.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 7,
+      "details": 0,
+      "anchors_hash": 8,
+      "dialogs_modal": 1,
+      "responsivegrid": 0,
+      "aem_grid": 0
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "div.grid-row",
+        "div.editorialInPageNavigation",
+        "div.freeEditorial.freeEditorialParsys.parsys"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 5,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 11,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 8,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 0,
+      "responsivegrid": 0
+    }
+  },
+  {
+    "id": "21",
+    "file": "data/html/UK/21.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 7,
+      "details": 0,
+      "anchors_hash": 18,
+      "dialogs_modal": 1,
+      "responsivegrid": 1,
+      "aem_grid": 21
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "script",
+        "script",
+        "script",
+        "script",
+        "script",
+        "script",
+        "div.grid-row.bleed",
+        "div.grid-row",
+        "div.dummy-parent-class"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 5,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 4,
+      "slider": 33,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 11,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 33,
+      "cards": 0,
+      "card": 82,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 21,
+      "responsivegrid": 1
+    }
+  },
+  {
+    "id": "3",
+    "file": "data/html/UK/3.html.gz",
+    "counts": {
+      "tablist": 0,
+      "tab": 0,
+      "tabpanel": 0,
+      "aria_expanded": 0,
+      "details": 0,
+      "anchors_hash": 1,
+      "dialogs_modal": 0,
+      "responsivegrid": 0,
+      "aem_grid": 0
+    },
+    "contexts": {
+      "has_main": false,
+      "has_header": false,
+      "has_nav": true
+    },
+    "top": {
+      "header": [],
+      "main": []
+    },
+    "keyword_hits": {
+      "c_010d": 0,
+      "meganav": 0,
+      "aria-modal": 0,
+      "dialog": 0,
+      "onetrust": 0,
+      "cookie": 1,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 0,
+      "tabs": 0,
+      "tablist": 0,
+      "tabpanel": 0,
+      "grid": 3,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 0,
+      "responsivegrid": 0
+    }
+  },
+  {
+    "id": "31",
+    "file": "data/html/UK/31.html.gz",
+    "counts": {
+      "tablist": 2,
+      "tab": 8,
+      "tabpanel": 3,
+      "aria_expanded": 7,
+      "details": 0,
+      "anchors_hash": 11,
+      "dialogs_modal": 1,
+      "responsivegrid": 0,
+      "aem_grid": 0
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "div",
+        "div.grid-row",
+        "div.contentZoneHeader.title",
+        "div.grid-row",
+        "div.contentZone",
+        "script"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 6,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 98,
+      "tabs": 11,
+      "tablist": 2,
+      "tabpanel": 3,
+      "grid": 10,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 0,
+      "responsivegrid": 0
+    }
+  },
+  {
+    "id": "3405",
+    "file": "data/html/UK/3405.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 215,
+      "details": 0,
+      "anchors_hash": 8,
+      "dialogs_modal": 1,
+      "responsivegrid": 5,
+      "aem_grid": 8
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "script",
+        "div",
+        "div.grid-row",
+        "div#__next",
+        "script#__NEXT_DATA__",
+        "div.next-js-artifacts-items",
+        "div.container"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 6,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 1753,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 15,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 3,
+      "aem-grid": 8,
+      "responsivegrid": 5
+    }
+  },
+  {
+    "id": "3430",
+    "file": "data/html/UK/3430.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 215,
+      "details": 0,
+      "anchors_hash": 8,
+      "dialogs_modal": 1,
+      "responsivegrid": 5,
+      "aem_grid": 8
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "script",
+        "div",
+        "div.grid-row",
+        "div#__next",
+        "script#__NEXT_DATA__",
+        "div.next-js-artifacts-items",
+        "div.container"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 6,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 1752,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 15,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 3,
+      "aem-grid": 8,
+      "responsivegrid": 5
+    }
+  },
+  {
+    "id": "3720",
+    "file": "data/html/UK/3720.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 215,
+      "details": 0,
+      "anchors_hash": 8,
+      "dialogs_modal": 1,
+      "responsivegrid": 5,
+      "aem_grid": 8
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "script",
+        "div",
+        "div.grid-row",
+        "div#__next",
+        "script#__NEXT_DATA__",
+        "div.next-js-artifacts-items",
+        "div.container"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 6,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 1753,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 15,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 3,
+      "aem-grid": 8,
+      "responsivegrid": 5
+    }
+  },
+  {
+    "id": "38",
+    "file": "data/html/UK/38.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 12,
+      "details": 0,
+      "anchors_hash": 30,
+      "dialogs_modal": 1,
+      "responsivegrid": 4,
+      "aem_grid": 31
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "script",
+        "script",
+        "script",
+        "script",
+        "script",
+        "script",
+        "div.grid-row.bleed",
+        "div.grid-row",
+        "div.dummy-parent-class"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 5,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 4,
+      "slider": 63,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 25,
+      "tabs": 2,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 44,
+      "cards": 0,
+      "card": 52,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 31,
+      "responsivegrid": 4
+    }
+  },
+  {
+    "id": "4",
+    "file": "data/html/UK/4.html.gz",
+    "counts": {
+      "tablist": 0,
+      "tab": 0,
+      "tabpanel": 0,
+      "aria_expanded": 0,
+      "details": 0,
+      "anchors_hash": 1,
+      "dialogs_modal": 0,
+      "responsivegrid": 0,
+      "aem_grid": 0
+    },
+    "contexts": {
+      "has_main": false,
+      "has_header": false,
+      "has_nav": true
+    },
+    "top": {
+      "header": [],
+      "main": []
+    },
+    "keyword_hits": {
+      "c_010d": 0,
+      "meganav": 0,
+      "aria-modal": 0,
+      "dialog": 0,
+      "onetrust": 0,
+      "cookie": 1,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 0,
+      "tabs": 0,
+      "tablist": 0,
+      "tabpanel": 0,
+      "grid": 3,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 0,
+      "responsivegrid": 0
+    }
+  },
+  {
+    "id": "46",
+    "file": "data/html/UK/46.html.gz",
+    "counts": {
+      "tablist": 2,
+      "tab": 8,
+      "tabpanel": 3,
+      "aria_expanded": 7,
+      "details": 0,
+      "anchors_hash": 11,
+      "dialogs_modal": 1,
+      "responsivegrid": 0,
+      "aem_grid": 0
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "div",
+        "div.grid-row",
+        "div.contentZoneHeader.title",
+        "div.grid-row",
+        "div.contentZone",
+        "script"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 6,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 128,
+      "tabs": 11,
+      "tablist": 2,
+      "tabpanel": 3,
+      "grid": 10,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 0,
+      "responsivegrid": 0
+    }
+  },
+  {
+    "id": "5",
+    "file": "data/html/UK/5.html.gz",
+    "counts": {
+      "tablist": 0,
+      "tab": 0,
+      "tabpanel": 0,
+      "aria_expanded": 0,
+      "details": 0,
+      "anchors_hash": 1,
+      "dialogs_modal": 0,
+      "responsivegrid": 0,
+      "aem_grid": 0
+    },
+    "contexts": {
+      "has_main": false,
+      "has_header": false,
+      "has_nav": true
+    },
+    "top": {
+      "header": [],
+      "main": []
+    },
+    "keyword_hits": {
+      "c_010d": 0,
+      "meganav": 0,
+      "aria-modal": 0,
+      "dialog": 0,
+      "onetrust": 0,
+      "cookie": 1,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 0,
+      "tabs": 0,
+      "tablist": 0,
+      "tabpanel": 0,
+      "grid": 3,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 0,
+      "responsivegrid": 0
+    }
+  },
+  {
+    "id": "51",
+    "file": "data/html/UK/51.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 7,
+      "details": 0,
+      "anchors_hash": 34,
+      "dialogs_modal": 1,
+      "responsivegrid": 1,
+      "aem_grid": 26
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "script",
+        "script",
+        "script",
+        "script",
+        "script",
+        "script",
+        "div.grid-row.bleed",
+        "div.grid-row",
+        "div.dummy-parent-class"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 5,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 4,
+      "slider": 49,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 11,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 38,
+      "cards": 0,
+      "card": 82,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 26,
+      "responsivegrid": 1
+    }
+  },
+  {
+    "id": "522",
+    "file": "data/html/UK/522.html.gz",
+    "counts": {
+      "tablist": 0,
+      "tab": 0,
+      "tabpanel": 0,
+      "aria_expanded": 0,
+      "details": 0,
+      "anchors_hash": 0,
+      "dialogs_modal": 0,
+      "responsivegrid": 0,
+      "aem_grid": 0
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": false,
+      "has_nav": false
+    },
+    "top": {
+      "header": [],
+      "main": [
+        "div.dropdownEditorial.freeEditorialParsys.parsys"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 0,
+      "meganav": 0,
+      "aria-modal": 0,
+      "dialog": 0,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 0,
+      "tabs": 0,
+      "tablist": 0,
+      "tabpanel": 0,
+      "grid": 0,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 0,
+      "responsivegrid": 0
+    }
+  },
+  {
+    "id": "5400",
+    "file": "data/html/UK/5400.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 237,
+      "details": 0,
+      "anchors_hash": 8,
+      "dialogs_modal": 1,
+      "responsivegrid": 5,
+      "aem_grid": 8
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "script",
+        "div",
+        "div.grid-row",
+        "div#__next",
+        "script#__NEXT_DATA__",
+        "div.next-js-artifacts-items",
+        "div.container"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 6,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 2045,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 15,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 3,
+      "aem-grid": 8,
+      "responsivegrid": 5
+    }
+  },
+  {
+    "id": "5891",
+    "file": "data/html/UK/5891.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 237,
+      "details": 0,
+      "anchors_hash": 8,
+      "dialogs_modal": 1,
+      "responsivegrid": 5,
+      "aem_grid": 8
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "script",
+        "div",
+        "div.grid-row",
+        "div#__next",
+        "script#__NEXT_DATA__",
+        "div.next-js-artifacts-items",
+        "div.container"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 6,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 2038,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 15,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 3,
+      "aem-grid": 8,
+      "responsivegrid": 5
+    }
+  },
+  {
+    "id": "6",
+    "file": "data/html/UK/6.html.gz",
+    "counts": {
+      "tablist": 0,
+      "tab": 0,
+      "tabpanel": 0,
+      "aria_expanded": 0,
+      "details": 0,
+      "anchors_hash": 1,
+      "dialogs_modal": 0,
+      "responsivegrid": 0,
+      "aem_grid": 0
+    },
+    "contexts": {
+      "has_main": false,
+      "has_header": false,
+      "has_nav": true
+    },
+    "top": {
+      "header": [],
+      "main": []
+    },
+    "keyword_hits": {
+      "c_010d": 0,
+      "meganav": 0,
+      "aria-modal": 0,
+      "dialog": 0,
+      "onetrust": 0,
+      "cookie": 1,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 0,
+      "tabs": 0,
+      "tablist": 0,
+      "tabpanel": 0,
+      "grid": 3,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 0,
+      "responsivegrid": 0
+    }
+  },
+  {
+    "id": "62",
+    "file": "data/html/UK/62.html.gz",
+    "counts": {
+      "tablist": 2,
+      "tab": 8,
+      "tabpanel": 3,
+      "aria_expanded": 7,
+      "details": 0,
+      "anchors_hash": 11,
+      "dialogs_modal": 1,
+      "responsivegrid": 0,
+      "aem_grid": 0
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "div",
+        "div.grid-row",
+        "div.contentZoneHeader.title",
+        "div.grid-row",
+        "div.contentZone",
+        "script"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 6,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 86,
+      "tabs": 11,
+      "tablist": 2,
+      "tabpanel": 3,
+      "grid": 13,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 0,
+      "responsivegrid": 0
+    }
+  },
+  {
+    "id": "64",
+    "file": "data/html/UK/64.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 7,
+      "details": 0,
+      "anchors_hash": 19,
+      "dialogs_modal": 1,
+      "responsivegrid": 1,
+      "aem_grid": 22
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "script",
+        "script",
+        "script",
+        "script",
+        "script",
+        "script",
+        "div.grid-row.bleed",
+        "div.grid-row",
+        "div.dummy-parent-class"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 5,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 4,
+      "slider": 47,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 11,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 34,
+      "cards": 0,
+      "card": 82,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 22,
+      "responsivegrid": 1
+    }
+  },
+  {
+    "id": "7",
+    "file": "data/html/UK/7.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 7,
+      "details": 0,
+      "anchors_hash": 9,
+      "dialogs_modal": 1,
+      "responsivegrid": 0,
+      "aem_grid": 0
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "div.grid-row",
+        "div.editorialInPageNavigation",
+        "div.freeEditorial.freeEditorialParsys.parsys"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 5,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 11,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 7,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 0,
+      "responsivegrid": 0
+    }
+  },
+  {
+    "id": "70",
+    "file": "data/html/UK/70.html.gz",
+    "counts": {
+      "tablist": 2,
+      "tab": 7,
+      "tabpanel": 2,
+      "aria_expanded": 7,
+      "details": 0,
+      "anchors_hash": 10,
+      "dialogs_modal": 1,
+      "responsivegrid": 0,
+      "aem_grid": 0
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "div",
+        "div.grid-row",
+        "div.contentZoneHeader.title",
+        "div.grid-row",
+        "div.contentZone",
+        "script"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 6,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 73,
+      "tabs": 9,
+      "tablist": 2,
+      "tabpanel": 2,
+      "grid": 13,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 0,
+      "responsivegrid": 0
+    }
+  },
+  {
+    "id": "72",
+    "file": "data/html/UK/72.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 9,
+      "details": 0,
+      "anchors_hash": 21,
+      "dialogs_modal": 1,
+      "responsivegrid": 4,
+      "aem_grid": 30
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "script",
+        "script",
+        "script",
+        "script",
+        "script",
+        "script",
+        "div.grid-row.bleed",
+        "div.grid-row",
+        "div.dummy-parent-class"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 5,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 4,
+      "slider": 48,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 25,
+      "tabs": 2,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 42,
+      "cards": 0,
+      "card": 36,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 30,
+      "responsivegrid": 4
+    }
+  },
+  {
+    "id": "7366",
+    "file": "data/html/UK/7366.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 237,
+      "details": 0,
+      "anchors_hash": 8,
+      "dialogs_modal": 1,
+      "responsivegrid": 5,
+      "aem_grid": 8
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "script",
+        "div",
+        "div.grid-row",
+        "div#__next",
+        "script#__NEXT_DATA__",
+        "div.next-js-artifacts-items",
+        "div.container"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 6,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 1962,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 15,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 3,
+      "aem-grid": 8,
+      "responsivegrid": 5
+    }
+  },
+  {
+    "id": "8",
+    "file": "data/html/UK/8.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 7,
+      "details": 0,
+      "anchors_hash": 9,
+      "dialogs_modal": 1,
+      "responsivegrid": 0,
+      "aem_grid": 0
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "div.grid-row",
+        "div.editorialInPageNavigation",
+        "div.freeEditorial.freeEditorialParsys.parsys"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 5,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 11,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 7,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 0,
+      "responsivegrid": 0
+    }
+  },
+  {
+    "id": "8461",
+    "file": "data/html/UK/8461.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 253,
+      "details": 0,
+      "anchors_hash": 8,
+      "dialogs_modal": 1,
+      "responsivegrid": 5,
+      "aem_grid": 8
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "script",
+        "div",
+        "div.grid-row",
+        "div#__next",
+        "script#__NEXT_DATA__",
+        "div.next-js-artifacts-items",
+        "div.container"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 6,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 2059,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 15,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 3,
+      "aem-grid": 8,
+      "responsivegrid": 5
+    }
+  },
+  {
+    "id": "8980",
+    "file": "data/html/UK/8980.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 253,
+      "details": 0,
+      "anchors_hash": 8,
+      "dialogs_modal": 1,
+      "responsivegrid": 5,
+      "aem_grid": 8
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "script",
+        "div",
+        "div.grid-row",
+        "div#__next",
+        "script#__NEXT_DATA__",
+        "div.next-js-artifacts-items",
+        "div.container"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 6,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 2063,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 15,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 3,
+      "aem-grid": 8,
+      "responsivegrid": 5
+    }
+  },
+  {
+    "id": "9",
+    "file": "data/html/UK/9.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 7,
+      "details": 0,
+      "anchors_hash": 9,
+      "dialogs_modal": 1,
+      "responsivegrid": 0,
+      "aem_grid": 0
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "div.grid-row",
+        "div.editorialInPageNavigation",
+        "div.freeEditorial.freeEditorialParsys.parsys"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 5,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 11,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 7,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 0,
+      "aem-grid": 0,
+      "responsivegrid": 0
+    }
+  },
+  {
+    "id": "9079",
+    "file": "data/html/UK/9079.html.gz",
+    "counts": {
+      "tablist": 1,
+      "tab": 5,
+      "tabpanel": 0,
+      "aria_expanded": 253,
+      "details": 0,
+      "anchors_hash": 8,
+      "dialogs_modal": 1,
+      "responsivegrid": 5,
+      "aem_grid": 8
+    },
+    "contexts": {
+      "has_main": true,
+      "has_header": true,
+      "has_nav": true
+    },
+    "top": {
+      "header": [
+        "div.c_010D-breakpoint-test",
+        "div.c_010D-overlay",
+        "div.wrapper",
+        "div.meganav-container"
+      ],
+      "main": [
+        "script",
+        "div",
+        "div.grid-row",
+        "div#__next",
+        "script#__NEXT_DATA__",
+        "div.next-js-artifacts-items",
+        "div.container"
+      ]
+    },
+    "keyword_hits": {
+      "c_010d": 6,
+      "meganav": 3,
+      "aria-modal": 0,
+      "dialog": 1,
+      "onetrust": 0,
+      "cookie": 0,
+      "consent": 0,
+      "carousel": 0,
+      "slider": 0,
+      "swiper": 0,
+      "pagination": 0,
+      "accordion": 2057,
+      "tabs": 0,
+      "tablist": 1,
+      "tabpanel": 0,
+      "grid": 15,
+      "cards": 0,
+      "card": 0,
+      "tiles": 0,
+      "items": 3,
+      "aem-grid": 8,
+      "responsivegrid": 5
+    }
+  }
+]

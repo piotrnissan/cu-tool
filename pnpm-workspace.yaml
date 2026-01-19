@@ -1,0 +1,8 @@
+packages:
+  - api
+  - web
+
+onlyBuiltDependencies:
+  - better-sqlite3
+  - esbuild
+  - unrs-resolver
