@@ -9,3 +9,7 @@ coverage
 .DS_Store
 .cache
 .tmp
+
+# cu-tool generated cache / artifacts
+api/data/html/
+tmp-url.csv
