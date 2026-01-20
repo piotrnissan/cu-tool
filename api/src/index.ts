@@ -89,7 +89,7 @@ app.get("/api/inventory/build", async (req: Request, res: Response) => {
         SUM(CASE WHEN status = 'skipped' THEN 1 ELSE 0 END) as skipped
       FROM url_inventory
       WHERE market = ?
-    `
+    `,
       )
       .get(market) as {
       total: number;
@@ -129,7 +129,7 @@ app.get("/api/inventory/stats", (_req: Request, res: Response) => {
       SUM(CASE WHEN status = 'skipped' THEN 1 ELSE 0 END) as skipped
     FROM url_inventory
     GROUP BY market
-  `
+  `,
     )
     .all();
 
@@ -210,7 +210,7 @@ app.get("/api/inventory/render-stats", (_req: Request, res: Response) => {
     WHERE render_mode IS NOT NULL
     GROUP BY market, render_mode
     ORDER BY market, render_mode
-  `
+  `,
     )
     .all();
 
@@ -266,7 +266,7 @@ app.post("/api/html-cache/backfill", async (req: Request, res: Response) => {
     }
 
     console.log(
-      `Starting HTML cache backfill for ${market}: ${urlsToCache.length} URLs`
+      `Starting HTML cache backfill for ${market}: ${urlsToCache.length} URLs`,
     );
 
     // Create queue for controlled concurrency
@@ -341,7 +341,7 @@ app.post("/api/html-cache/backfill", async (req: Request, res: Response) => {
               html_fetched_at = datetime('now'),
               updated_at = datetime('now')
           WHERE id = ?
-        `
+        `,
         ).run(htmlPath, record.id);
 
         stats.cached++;
@@ -358,7 +358,7 @@ app.post("/api/html-cache/backfill", async (req: Request, res: Response) => {
 
     // Add all URLs to queue
     const promises = urlsToCache.map((record) =>
-      activeBackfillJob!.add(() => processUrl(record))
+      activeBackfillJob!.add(() => processUrl(record)),
     );
 
     // Wait for completion
@@ -394,7 +394,7 @@ app.get("/api/html-cache/status", (req: Request, res: Response) => {
     WHERE market = ?
       AND status = 'fetched'
       AND duplicate_of_id IS NULL
-  `
+  `,
     )
     .get(market) as {
     total_fetched_unique: number;
@@ -410,6 +410,84 @@ app.get("/api/html-cache/status", (req: Request, res: Response) => {
 });
 
 // Phase 2: David component analysis
+async function resetDavidAnalysisIfRequested(market: string, reset: boolean) {
+  if (!reset) return;
+
+  console.log("Resetting existing analysis data...");
+  const urlIds = db
+    .prepare(
+      `SELECT id FROM url_inventory WHERE market = ? AND status = 'fetched' AND duplicate_of_id IS NULL`,
+    )
+    .all(market) as Array<{ id: number }>;
+
+  const urlIdList = urlIds.map((r) => r.id);
+  if (urlIdList.length === 0) return;
+
+  const placeholders = urlIdList.map(() => "?").join(",");
+  db.prepare(
+    `DELETE FROM david_component_usage WHERE url_id IN (${placeholders})`,
+  ).run(...urlIdList);
+
+  console.log(`Deleted existing analysis data for ${urlIdList.length} URLs`);
+}
+
+async function analyzeEligibleUrlsBatch(params: {
+  market: string;
+  limit: number;
+  offset: number;
+}): Promise<{ count: number; processed: number }> {
+  const { market, limit, offset } = params;
+
+  const eligibleUrls = db
+    .prepare(
+      `
+          SELECT id, url, html_path
+          FROM url_inventory
+          WHERE market = ?
+            AND status = 'fetched'
+            AND duplicate_of_id IS NULL
+            AND html_path IS NOT NULL
+            AND html_path NOT LIKE '\\_\\_%' ESCAPE '\\'
+          ORDER BY id
+          LIMIT ? OFFSET ?
+        `,
+    )
+    .all(market, limit, offset) as Array<{
+    id: number;
+    url: string;
+    html_path: string;
+  }>;
+
+  const insertStmt = db.prepare(`
+        INSERT INTO david_component_usage (url_id, component_key, instance_count, confidence, evidence)
+        VALUES (?, ?, ?, ?, ?)
+      `);
+
+  let processed = 0;
+
+  for (const record of eligibleUrls) {
+    try {
+      const html = await readHtmlCache(record.html_path);
+      const detections = analyzeComponents(html);
+
+      for (const detection of detections) {
+        insertStmt.run(
+          record.id,
+          detection.componentKey,
+          detection.instanceCount,
+          detection.confidence,
+          detection.evidence,
+        );
+      }
+    } catch (error) {
+      console.error(`  Error analyzing ${record.url}:`, error);
+    } finally {
+      processed++;
+    }
+  }
+
+  return { count: eligibleUrls.length, processed };
+}
 app.post(
   "/api/analysis/david-components/run",
   async (req: Request, res: Response) => {
@@ -438,7 +516,7 @@ app.post(
           console.log("Resetting existing analysis data...");
           const urlIds = db
             .prepare(
-              `SELECT id FROM url_inventory WHERE market = ? AND status = 'fetched' AND duplicate_of_id IS NULL`
+              `SELECT id FROM url_inventory WHERE market = ? AND status = 'fetched' AND duplicate_of_id IS NULL`,
             )
             .all(market) as Array<{ id: number }>;
 
@@ -446,10 +524,10 @@ app.post(
           if (urlIdList.length > 0) {
             const placeholders = urlIdList.map(() => "?").join(",");
             db.prepare(
-              `DELETE FROM david_component_usage WHERE url_id IN (${placeholders})`
+              `DELETE FROM david_component_usage WHERE url_id IN (${placeholders})`,
             ).run(...urlIdList);
             console.log(
-              `Deleted existing analysis data for ${urlIdList.length} URLs`
+              `Deleted existing analysis data for ${urlIdList.length} URLs`,
             );
           }
         }
@@ -467,7 +545,7 @@ app.post(
             AND html_path NOT LIKE '\\_\\_%' ESCAPE '\\'
           ORDER BY id
           LIMIT ? OFFSET ?
-        `
+        `,
           )
           .all(market, limit, offset) as Array<{
           id: number;
@@ -499,14 +577,14 @@ app.post(
                 detection.componentKey,
                 detection.instanceCount,
                 detection.confidence,
-                detection.evidence
+                detection.evidence,
               );
             }
 
             activeAnalysisJob!.processed++;
             if (activeAnalysisJob!.processed % 50 === 0) {
               console.log(
-                `  Progress: ${activeAnalysisJob!.processed}/${activeAnalysisJob!.total}`
+                `  Progress: ${activeAnalysisJob!.processed}/${activeAnalysisJob!.total}`,
               );
             }
           } catch (error) {
@@ -515,7 +593,7 @@ app.post(
         }
 
         console.log(
-          `\nAnalysis complete: ${activeAnalysisJob!.processed}/${activeAnalysisJob!.total} URLs analyzed`
+          `\nAnalysis complete: ${activeAnalysisJob!.processed}/${activeAnalysisJob!.total} URLs analyzed`,
         );
         activeAnalysisJob = null;
       } catch (error) {
@@ -523,7 +601,92 @@ app.post(
         activeAnalysisJob = null;
       }
     });
-  }
+  },
+);
+
+app.post(
+  "/api/analysis/david-components/run-all",
+  async (req: Request, res: Response) => {
+    const {
+      market = "UK",
+      batchSize = 200,
+      reset = false,
+      startOffset = 0,
+      maxBatches,
+    } = req.body;
+
+    if (activeAnalysisJob?.running) {
+      return res.status(409).json({ error: "Analysis job already running" });
+    }
+
+    activeAnalysisJob = { running: true, processed: 0, total: 0 };
+
+    res.json({
+      success: true,
+      message: "Analysis run-all job started",
+      config: { market, batchSize, reset, startOffset, maxBatches },
+    });
+
+    setImmediate(async () => {
+      try {
+        console.log(
+          `\nStarting David component analysis (run-all) for ${market}...`,
+        );
+
+        await resetDavidAnalysisIfRequested(market, !!reset);
+
+        let offset = Number.isFinite(startOffset) ? startOffset : 0;
+        const limit = Number.isFinite(batchSize) ? batchSize : 200;
+        const max = Number.isFinite(maxBatches) ? maxBatches : undefined;
+
+        let batchIndex = 0;
+
+        while (true) {
+          if (max !== undefined && batchIndex >= max) {
+            console.log(`Reached maxBatches=${max}. Stopping.`);
+            break;
+          }
+
+          console.log(
+            `\nBatch ${batchIndex + 1}: limit=${limit}, offset=${offset}`,
+          );
+
+          const { count, processed } = await analyzeEligibleUrlsBatch({
+            market,
+            limit,
+            offset,
+          });
+
+          activeAnalysisJob!.processed += processed;
+
+          if (count === 0) {
+            console.log("No more eligible URLs. Done.");
+            break;
+          }
+
+          offset += count;
+          batchIndex++;
+
+          // Lightweight progress log
+          console.log(`  Processed so far: ${activeAnalysisJob!.processed}`);
+
+          // If last batch was smaller than requested, we are at the end
+          if (count < limit) {
+            console.log("Last batch smaller than batchSize. Done.");
+            break;
+          }
+        }
+
+        console.log(
+          `\nRun-all complete: processed=${activeAnalysisJob!.processed}`,
+        );
+        activeAnalysisJob = null;
+      } catch (error) {
+        console.error("Error in run-all analysis job:", error);
+        activeAnalysisJob = null;
+      }
+    });
+  },
 );
 
 app.get(
@@ -549,7 +712,7 @@ app.get(
       WHERE ui.market = ?
       GROUP BY dcu.component_key, dcu.confidence
       ORDER BY pages_with_component DESC, dcu.component_key
-    `
+    `,
       )
       .all(market) as Array<{
       component_key: string;
@@ -579,7 +742,7 @@ app.get(
         component_key: string;
         pages_with_component: number;
         total_instances: number;
-      }>
+      }>,
     );
 
     res.json({
@@ -594,7 +757,7 @@ app.get(
       summary: aggregated,
       details: summary,
     });
-  }
+  },
 );
 
 app.listen(PORT, () => {

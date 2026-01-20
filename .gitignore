@@ -14,3 +14,10 @@ coverage
 api/data/html/
 tmp-url.csv
 api/data/*.db
+
+# SQLite sidecar files
+api/data/*.db-wal
+api/data/*.db-shm
+
+# (Optional but recommended) ignore all generated local data
+api/data/

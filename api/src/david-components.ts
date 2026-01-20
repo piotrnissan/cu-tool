@@ -12,6 +12,10 @@ export interface ComponentDetection {
  * Apply to all detectors to filter out non-content elements
  */
 const GLOBAL_CHROME_EXCLUSIONS = [
+  // Footer (primary - semantic + role)
+  "footer",
+  '[role="contentinfo"]',
+
   // Header/nav
   "header",
   "nav",
@@ -21,15 +25,16 @@ const GLOBAL_CHROME_EXCLUSIONS = [
   // Modal dialogs
   '[role="dialog"][aria-modal="true"]',
 
-  // Footer (contentinfo role only)
-  '[role="contentinfo"]',
-
   // Cookie/consent overlays
   "#onetrust-consent-sdk",
   '[id*="onetrust"]',
   '[class*="onetrust"]',
-  '[class*="cookie-banner"]',
+  '[class*="cookie"]',
   '[class*="consent"]',
+
+  // Footer fallback (class/id patterns)
+  '[id*="footer"]',
+  '[class*="footer"]',
 ];
 
 /**
@@ -162,11 +167,11 @@ function detectAccordion(dom: JSDOM): ComponentDetection | null {
   const doc = dom.window.document;
   const contentRoot = getContentRoot(doc);
 
-  // Method 1: Native details/summary
+  // Method 1: Native details/summary (semantic HTML)
   const detailsElements = Array.from(doc.querySelectorAll("details")).filter(
     (el) => {
       return !isInGlobalChrome(el) && contentRoot.contains(el);
-    }
+    },
   );
 
   if (detailsElements.length >= 3) {
@@ -174,28 +179,28 @@ function detectAccordion(dom: JSDOM): ComponentDetection | null {
       componentKey: "accordion",
       instanceCount: 1,
       confidence: "high",
-      evidence: `<details> accordion: ${detailsElements.length} items`,
+      evidence: `accordion: 1, items=${detailsElements.length}, source=details`,
     };
   }
 
-  // Method 2: ARIA accordion pattern
+  // Method 2: ARIA accordion pattern (aria-expanded + aria-controls)
   const ariaExpanded = Array.from(
-    doc.querySelectorAll("[aria-expanded]")
+    doc.querySelectorAll("[aria-expanded]"),
   ).filter((el) => {
-    // Exclude global chrome
+    // Exclude global chrome (footer, header, nav, etc.)
     if (isInGlobalChrome(el)) return false;
 
     // Require inside content root
     if (!contentRoot.contains(el)) return false;
 
-    // REQUIRE aria-controls pointing to panel
+    // REQUIRE aria-controls pointing to an existing panel
     const controls = el.getAttribute("aria-controls");
     if (!controls) return false;
 
     const panel = doc.getElementById(controls);
     if (!panel) return false;
 
-    // Panel must have meaningful content (not empty layout wrapper)
+    // Panel must have meaningful content (>= 50 chars to avoid footer toggles)
     const hasContent = (panel.textContent?.trim().length || 0) >= 50;
     return hasContent;
   });
@@ -205,7 +210,7 @@ function detectAccordion(dom: JSDOM): ComponentDetection | null {
       componentKey: "accordion",
       instanceCount: 1,
       confidence: "medium",
-      evidence: `ARIA accordion: ${ariaExpanded.length} items (in content)`,
+      evidence: `accordion: 1, items=${ariaExpanded.length}, source=aria-controls`,
     };
   }
 
@@ -264,7 +269,7 @@ function hasCarouselControls(element: Element): boolean {
     ".swiper-pagination, .slick-dots, " +
       '[class*="pagination"], [class*="dots"], ' +
       'button[aria-label*="next" i], button[aria-label*="prev" i], ' +
-      '[class*="prev"], [class*="next"], [class*="arrow"]'
+      '[class*="prev"], [class*="next"], [class*="arrow"]',
   );
   return controls.length >= 1;
 }
@@ -303,7 +308,7 @@ function detectImageCarousel(dom: JSDOM): ComponentDetection | null {
   // Method 1: Keyword-based
   carouselKeywords.forEach((keyword) => {
     const elements = contentRoot.querySelectorAll(
-      `[class*="${keyword}"], [id*="${keyword}"], [data-component*="${keyword}"]`
+      `[class*="${keyword}"], [id*="${keyword}"], [data-component*="${keyword}"]`,
     );
 
     elements.forEach((el) => {
@@ -341,7 +346,7 @@ function detectImageCarousel(dom: JSDOM): ComponentDetection | null {
   // Step 2: Robust nested deduplication (outermost-only)
   // Sort by DOM depth (outermost first)
   const sortedCandidates = rawCandidates.sort(
-    (a, b) => getDOMDepth(a) - getDOMDepth(b)
+    (a, b) => getDOMDepth(a) - getDOMDepth(b),
   );
 
   const deduped: Element[] = [];
@@ -431,7 +436,7 @@ function detectCardCarousel(dom: JSDOM): ComponentDetection | null {
 
   carouselKeywords.forEach((keyword) => {
     const elements = contentRoot.querySelectorAll(
-      `[class*="${keyword}"], [id*="${keyword}"], [data-component*="${keyword}"]`
+      `[class*="${keyword}"], [id*="${keyword}"], [data-component*="${keyword}"]`,
     );
 
     elements.forEach((el) => {
@@ -468,7 +473,7 @@ function detectCardCarousel(dom: JSDOM): ComponentDetection | null {
 
   // Step 2: Robust nested deduplication (outermost-only)
   const sortedCandidates = rawCandidates.sort(
-    (a, b) => getDOMDepth(a) - getDOMDepth(b)
+    (a, b) => getDOMDepth(a) - getDOMDepth(b),
   );
 
   const deduped: Element[] = [];
@@ -544,7 +549,7 @@ function detectCardCarousel(dom: JSDOM): ComponentDetection | null {
               item.querySelector("[data-src]") !== null;
 
             return hasHeading || hasImage;
-          }
+          },
         );
 
         if (items.length > cardLikeItems.length) {
@@ -631,7 +636,7 @@ function detectCardsSection(dom: JSDOM): ComponentDetection | null {
 
       // Count direct children that are card-like
       const cardLikeChildren = Array.from(container.children).filter((child) =>
-        isCardLikeItem(child)
+        isCardLikeItem(child),
       );
 
       if (cardLikeChildren.length >= 3) {
@@ -644,7 +649,7 @@ function detectCardsSection(dom: JSDOM): ComponentDetection | null {
   // Deduplicate nested: keep only outermost
   const outermost = candidates.filter((candidate) => {
     const hasParent = candidates.some(
-      (other) => other !== candidate && other.contains(candidate)
+      (other) => other !== candidate && other.contains(candidate),
     );
     return !hasParent;
   });
@@ -654,7 +659,7 @@ function detectCardsSection(dom: JSDOM): ComponentDetection | null {
   // Gather items_per_section for evidence
   const itemsPerSection = outermost.map((section) => {
     const cardLikeChildren = Array.from(section.children).filter((child) =>
-      isCardLikeItem(child)
+      isCardLikeItem(child),
     );
     return cardLikeChildren.length;
   });

@@ -52,19 +52,21 @@ cards_section | 70 pages | 0.8% | min=1 | max=4 | avg=1.4 | total=96
 _Historical context: Initial validation showed 42 pages (21%) with cards_section. Full dataset reveals this component is concentrated in specific page types that were over-represented in the validation sample._
 
 **Top URLs by instance count** (from validation sample):
-| URL | Instances | Evidence |
-|-----|-----------|----------|
-| fleet-cars/fleet-car-solutions.html | 4 | `items_per_section=[4,3,4,4]` |
-| fleet-cars/company-car-drivers.html | 4 | `items_per_section=[3,3,4,4]` |
-| vehicles/brochures.html | 3 | `items_per_section=[3,3,3]` |
-| vehicles/new-vehicles.html | 2 | `items_per_section=[6,3]` |
+
+| URL                                 | Instances | Evidence                      |
+| ----------------------------------- | --------- | ----------------------------- |
+| fleet-cars/fleet-car-solutions.html | 4         | `items_per_section=[4,3,4,4]` |
+| fleet-cars/company-car-drivers.html | 4         | `items_per_section=[3,3,4,4]` |
+| vehicles/brochures.html             | 3         | `items_per_section=[3,3,3]`   |
+| vehicles/new-vehicles.html          | 2         | `items_per_section=[6,3]`     |
 
 **Spec page behavior** (validation sample):
-| URL | Instances | Evidence |
-|-----|-----------|----------|
-| ariya/price-specifications.html | 1 | `items_per_section=[3]` |
-| x-trail/price-specifications.html | 1 | `items_per_section=[5]` |
-| juke/prices-specifications.html | 1 | `items_per_section=[5]` |
+
+| URL                               | Instances | Evidence                |
+| --------------------------------- | --------- | ----------------------- |
+| ariya/price-specifications.html   | 1         | `items_per_section=[3]` |
+| x-trail/price-specifications.html | 1         | `items_per_section=[5]` |
+| juke/prices-specifications.html   | 1         | `items_per_section=[5]` |
 
 ### Backward Compatibility
 
@@ -163,30 +165,33 @@ LIMIT 10;  -- Edit this
 _Historical context: Initial hardening validation showed identical page counts for both carousel types, confirming detector stability._
 
 **Before vs After hardening**:
-| Component | Before | After | Reduction |
-|-----------|--------|-------|-----------|
-| image_carousel | 13 pages, 94 instances (7.2 avg) | 13 pages, 52 instances (4.0 avg) | 45% |
-| card_carousel | 13 pages, 52 instances (4.0 avg) | 10 pages, 10 instances (1.0 avg) | 80% |
+
+| Component      | Before                           | After                            | Reduction |
+| -------------- | -------------------------------- | -------------------------------- | --------- |
+| image_carousel | 13 pages, 94 instances (7.2 avg) | 13 pages, 52 instances (4.0 avg) | 45%       |
+| card_carousel  | 13 pages, 52 instances (4.0 avg) | 10 pages, 10 instances (1.0 avg) | 80%       |
 
 **image_carousel - Top 5 URLs**:
-| URL | Instances | Evidence |
-|-----|-----------|----------|
-| vehicles/new-vehicles/ariya.html | 7 | `items=[12,8,8,4,6,6,6], controls=yes` |
-| e-power-flash-dc.html | 5 | `items=[20,6,6,8,8], controls=yes` |
-| vehicles/new-vehicles/x-trail.html | 5 | `items=[20,6,6,8,8], controls=yes` |
-| vehicles/new-vehicles/juke.html | 5 | `items=[20,6,6,8,6], controls=yes` |
-| vehicles/new-vehicles/townstar.html | 4 | `items=[8,12,6,10], controls=yes` |
 
-**Manual validation**: https://www.nissan.co.uk/vehicles/new-vehicles/ariya.html confirmed to have ~6-7 distinct image carousels. Detector output of 7 is accurate.
+| URL                                 | Instances | Evidence                               |
+| ----------------------------------- | --------- | -------------------------------------- |
+| vehicles/new-vehicles/ariya.html    | 7         | `items=[12,8,8,4,6,6,6], controls=yes` |
+| e-power-flash-dc.html               | 5         | `items=[20,6,6,8,8], controls=yes`     |
+| vehicles/new-vehicles/x-trail.html  | 5         | `items=[20,6,6,8,8], controls=yes`     |
+| vehicles/new-vehicles/juke.html     | 5         | `items=[20,6,6,8,6], controls=yes`     |
+| vehicles/new-vehicles/townstar.html | 4         | `items=[8,12,6,10], controls=yes`      |
+
+**Manual validation**: <https://www.nissan.co.uk/vehicles/new-vehicles/ariya.html> confirmed to have ~6-7 distinct image carousels. Detector output of 7 is accurate.
 
 **card_carousel - Top 5 URLs**:
-| URL | Instances | Evidence |
-|-----|-----------|----------|
-| e-power-flash-dc.html | 1 | `items=[6], controls` |
-| vehicles/new-vehicles/qashqai.html | 1 | `items=[6], controls` |
-| vehicles/new-vehicles/ariya.html | 1 | `items=[4], controls` |
-| vehicles/new-vehicles/x-trail.html | 1 | `items=[6], controls` |
-| vehicles/new-vehicles/juke.html | 1 | `items=[6], controls` |
+
+| URL                                | Instances | Evidence              |
+| ---------------------------------- | --------- | --------------------- |
+| e-power-flash-dc.html              | 1         | `items=[6], controls` |
+| vehicles/new-vehicles/qashqai.html | 1         | `items=[6], controls` |
+| vehicles/new-vehicles/ariya.html   | 1         | `items=[4], controls` |
+| vehicles/new-vehicles/x-trail.html | 1         | `items=[6], controls` |
+| vehicles/new-vehicles/juke.html    | 1         | `items=[6], controls` |
 
 **Key improvements**:
 
@@ -212,73 +217,6 @@ Result: 10 pages detected with clean 1:1 counting. All use explicit controls (sc
 
 ---
 
-## 3. Taxonomy Evaluation
-
-### Summary Recommendation
-
-**Keep three-way taxonomy (`cards_section`, `image_carousel`, `card_carousel`) for analysis phase.**
-
-- Provides granular migration data that can be consolidated later
-- Cannot disaggregate if merged prematurely
-- Each has distinct migration complexity (static vs interactive)
-
-**Flag `card_carousel` as candidate for consolidation in Storyblok design** - may become a display mode of unified Cards component.
-
-### Component Assessment
-
-| Component          | Editorial Intent                    | Migration Complexity   | UK Prevalence (Full Dataset) | Storyblok Mapping      |
-| ------------------ | ----------------------------------- | ---------------------- | ---------------------------- | ---------------------- |
-| **cards_section**  | Display collection of related items | LOW (static HTML)      | LOW (0.8%, 1.4 avg)          | Cards Grid/List block  |
-| **image_carousel** | Display browsable image gallery     | MEDIUM-HIGH (JS, a11y) | RARE (0.2%, 4 avg)           | Image Carousel/Gallery |
-| **card_carousel**  | Ambiguous (scroll vs promotion)     | MEDIUM-HIGH (JS, a11y) | RARE (0.1%, 1 avg)           | TBD (see below)        |
-
-**Verdicts (based on full UK dataset)**:
-
-- `cards_section`: Low prevalence (0.8%), but required for fleet/brochure landing pages
-- `image_carousel`: Rare (0.2%), but critical for vehicle product pages where present
-- `card_carousel`: Rare (0.1%), consolidation candidate for Storyblok design
-
-### Taxonomy Risks
-
-**Risk A - Taxonomy proliferation**: Three components for "things that display cards" may confuse Storyblok authors. Consider single "Cards" block with display modes.
-
-**Risk B - Migration effort double-counting**: Vehicle pages likely have both `cards_section` and `card_carousel`. Run co-occurrence analysis before scoping.
-
-**Risk C - Carousel complexity underestimation**: Both carousel types need similar JS infrastructure. Use shared carousel foundation in Storyblok.
-
-**Risk D - Static vs interactive equivalence**: `cards_section` (static) has lower migration cost than `card_carousel` (interactive). Keeping separate for analysis preserves this distinction.
-
-### Recommended Validation
-
-**Co-occurrence query**:
-
-```sql
-SELECT COUNT(DISTINCT cs.url_id) as pages_with_both
-FROM david_component_usage cs
-JOIN david_component_usage cc ON cs.url_id = cc.url_id
-WHERE cs.component_key = 'cards_section'
-  AND cc.component_key = 'card_carousel';
-```
-
-**Interpretation**:
-
-- High overlap (>80%): `card_carousel` is supplementary, consolidate as display mode
-- Low overlap (<30%): Distinct editorial purpose, keep separate
-
-### Storyblok Design Implication
-
-Design recommendation (not a change to current detection taxonomy):
-
-| AEM Component    | Storyblok Block               | Notes                                  |
-| ---------------- | ----------------------------- | -------------------------------------- |
-| `cards_section`  | **Cards** (display: grid)     | Primary use case                       |
-| `card_carousel`  | **Cards** (display: carousel) | Same block, different mode             |
-| `image_carousel` | **Image Gallery**             | Distinct block (content model differs) |
-
-Consolidates cards into one author-facing block while keeping image carousels separate (different content: structured cards vs raw images).
-
----
-
 ## 4. Component Summary - Full UK Dataset
 
 **Dataset**: 8,468 eligible UK URLs (fetched, deduplicated, HTML present)
@@ -295,7 +233,7 @@ Consolidates cards into one author-facing block while keeping image carousels se
 
 **Key insights**:
 
-- **accordion** dominates (86.2% of pages) - likely used for FAQs, specs, and content collapse
+- **accordion** appears on 86.2% of eligible URLs, but this signal is likely inflated by global chrome (e.g., mobile footer/navigation accordions). Treat accordion prevalence as provisional until the detector excludes global chrome.
 - **cards_section**, **carousels**, and **tabs** are specialized components for specific page types
 - Clean 1:1 component-level counting maintained for accordion, card_carousel, anchor_nav
 - image_carousel averages 4 per page on vehicle pages (realistic for feature-rich product content)
@@ -303,7 +241,98 @@ Consolidates cards into one author-facing block while keeping image carousels se
 
 ---
 
-## 5. Known Limitations & Edge Cases
+## 5. Component Usage by Page Type (Overall / VLP / Editorial)
+
+### Methodology
+
+**Segmentation definitions**:
+
+- **VLP (Vehicle Landing Pages)**: URLs matching:
+  - `https://www.nissan.co.uk/vehicles/new-vehicles%`
+  - `https://micra.nissan.co.uk/%`
+  - `https://leaf.nissan.co.uk/%`
+- **Editorial**: All other eligible UK URLs (content, support, owner's manuals, fleet, etc.)
+
+**Denominator (eligible URLs)**:
+
+- market='UK', status='fetched', duplicate_of_id IS NULL, html_path IS NOT NULL, and html_path NOT LIKE '\_\_%' ESCAPE '\\'
+- **Total**: 8,468 eligible URLs
+- **VLP**: 102 URLs (1.2% of total)
+- **Editorial**: 8,366 URLs (98.8% of total)
+
+**Detection coverage**:
+
+- URLs with at least one component detected: **7,391 URLs (87.3% of eligible)**
+- URLs with zero detections: 1,077 (12.7%)
+
+---
+
+### UK Overall (8,468 eligible URLs)
+
+| Component      | Pages | % of Eligible | Avg per Page | Total Instances |
+| -------------- | ----- | ------------- | ------------ | --------------- |
+| accordion      | 7,296 | 86.2%         | 1.0          | 7,296           |
+| cards_section  | 70    | 0.8%          | 1.4          | 96              |
+| tabs           | 19    | 0.2%          | 1.1          | 20              |
+| image_carousel | 13    | 0.2%          | 4.0          | 52              |
+| card_carousel  | 10    | 0.1%          | 1.0          | 10              |
+| anchor_nav     | 8     | 0.1%          | 1.0          | 8               |
+
+---
+
+### VLP (102 eligible URLs)
+
+| Component      | Pages | % of Eligible VLP | Avg per Page | Total Instances |
+| -------------- | ----- | ----------------- | ------------ | --------------- |
+| image_carousel | 12    | 11.8%             | 3.9          | 47              |
+| card_carousel  | 9     | 8.8%              | 1.0          | 9               |
+| cards_section  | 8     | 7.8%              | 1.1          | 9               |
+| tabs           | 5     | 4.9%              | 1.0          | 5               |
+| accordion      | 5     | 4.9%              | 1.0          | 5               |
+
+---
+
+### Editorial (8,366 eligible URLs)
+
+| Component      | Pages | % of Eligible Editorial | Avg per Page | Total Instances |
+| -------------- | ----- | ----------------------- | ------------ | --------------- |
+| accordion      | 7,291 | 87.2%                   | 1.0          | 7,291           |
+| cards_section  | 62    | 0.7%                    | 1.4          | 87              |
+| tabs           | 14    | 0.2%                    | 1.1          | 15              |
+| anchor_nav     | 8     | 0.1%                    | 1.0          | 8               |
+| image_carousel | 1     | 0.0%                    | 5.0          | 5               |
+| card_carousel  | 1     | 0.0%                    | 1.0          | 1               |
+
+**⚠️ Accordion reliability note**: The 87.2% accordion presence in Editorial is **NOT content-only** and should not be used as a reliable indicator yet. A histogram of detected accordion item counts shows an extreme skew toward very large item counts (51+), which is inconsistent with typical in-content FAQ/spec accordions and strongly suggests global chrome leakage (commonly mobile footer/navigation patterns).
+
+---
+
+### Key Findings
+
+**Accordion inflation is segment-specific**:
+
+- Editorial pages: **87.2%** accordion presence (7,291 of 8,366)
+- VLP pages: **4.9%** accordion presence (5 of 102)
+- **18x difference** confirms accordion inflation is concentrated in Editorial content (owner's manuals, support pages)
+
+**VLP is carousel-heavy (expected pattern)**:
+
+- image_carousel: 11.8% presence (product imagery)
+- card_carousel: 8.8% presence (product features)
+- cards_section: 7.8% presence (trim/spec comparison)
+- Minimal accordion usage (4.9%) on VLP pages
+
+**Editorial is accordion-dominated (likely inflated by global chrome)**:
+
+- 87.2% accordion presence on Editorial pages indicates systematic detection of non-content accordions.
+- Item-count histogram analysis is heavily concentrated in the 51+ bucket, which strongly suggests global chrome leakage (often mobile footer/navigation accordions) rather than editorial FAQ/spec accordions.
+- Other detected components remain rare in Editorial: cards_section 0.7%, tabs 0.2%, carousels ~0%.
+
+**Action**: Treat accordion as provisional for segment comparisons until the detector excludes global chrome; rerun UK analysis after the fix.
+
+---
+
+## 6. Known Limitations & Edge Cases
 
 ### cards_section
 
@@ -361,9 +390,9 @@ Run analysis on JP/US markets (if available) to validate detection patterns.
 
 ### Documentation
 
-- Add component definitions to `POC_component_taxonomy_v_0.md`
-- Document structural heuristics and acceptance rules
-- Document co-occurrence findings after running suggested query
+- Keep this report as the UK baseline for Tech Spike 2.
+- Store the SQL used for segment rankings (overall/VLP/editorial) under `analysis/sql/` for repeatable reporting.
+- Record any detector changes (e.g., accordion chrome exclusion) with before/after comparisons (histogram + top URLs) in this file.
 
 ---
 
