@@ -1,0 +1,7 @@
+# Editorial — Selected for Visual Proof Pack
+# Selection rule: Non-VLP pages (exclude homepage, exclude /vehicles/new-vehicles, exclude micra/leaf hosts)
+# Count: 2-3 pages
+
+https://www.nissan.co.uk/experience-nissan/electric-vehicles.html
+https://www.nissan.co.uk/ownership.html
+https://www.nissan.co.uk/experience-nissan/events/pop-up-event.html

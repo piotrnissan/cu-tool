@@ -1,0 +1,24 @@
+-- Component Ranking — Editorial
+-- Returns component prevalence across Editorial pages only
+--
+-- Editorial definition (UK):
+--   - Eligible URL (see eligible_urls_uk.sql)
+--   - AND NOT a VLP page (see component_ranking_vlp.sql for VLP definition)
+--   - AND NOT homepage (https://www.nissan.co.uk/)
+--
+-- Output columns:
+--   - component_key: Component type
+--   - pages: Number of Editorial pages with this component
+--   - pct_of_eligible_editorial: Percentage of eligible Editorial URLs (N / 8,366 * 100)
+--   - avg_per_page: Average instances per Editorial page
+--   - total_instances: Total instances across all Editorial pages
+--
+-- Denominator: 8,366 eligible Editorial URLs
+--
+-- Note: Accordion counts in Editorial are UNRELIABLE due to footer chrome leakage.
+--       See docs/methodology.md for details.
+--
+-- Usage:
+--   sqlite3 api/data/cu-tool.db < analysis/sql/component_ranking_editorial.sql
+
+-- TODO: Fill in actual query in Sprint 3 (VP-20)

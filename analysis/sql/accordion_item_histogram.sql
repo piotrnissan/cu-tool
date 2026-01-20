@@ -1,0 +1,23 @@
+-- Accordion Item Count Histogram
+-- Returns distribution of accordion item counts across UK pages
+--
+-- Purpose: Identify accordion inflation patterns (global chrome leakage)
+--
+-- Buckets:
+--   - 1-5 items: Small accordions (likely editorial content)
+--   - 6-10 items: Medium accordions (FAQs, specs)
+--   - 11-20 items: Large accordions (uncommon)
+--   - 21-50 items: Very large accordions (suspicious)
+--   - 51+ items: Massive accordions (likely global chrome/footer)
+--
+-- Output columns:
+--   - bucket: Item count range
+--   - pages: Number of pages in this bucket
+--   - pct: Percentage of pages with accordion (N / total_pages_with_accordion * 100)
+--
+-- Expected result: 51+ bucket dominates (~1,838 pages with 192 items = footer navigation)
+--
+-- Usage:
+--   sqlite3 api/data/cu-tool.db < analysis/sql/accordion_item_histogram.sql
+
+-- TODO: Fill in actual query in Sprint 3 (VP-20)

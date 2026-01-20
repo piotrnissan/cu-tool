@@ -1,5 +1,11 @@
 # Tech Spike 2 — POC Definition of Done
 
+**Status**: POC-level DoD (remains valid)
+
+**Current workstream**: Tool Hardening + Visual Proof + Human QA — see [docs/plan.md](docs/plan.md) for v1 implementation plan (11-component model, quality gates, 42 tasks across 3 sprints).
+
+---
+
 ## Context
 
 This document defines what **DONE** means for the **Tech Spike 2 POC/MVP**.
@@ -155,7 +161,7 @@ Dataset must allow:
 ### Mandatory behaviour:
 
 - Every answer includes snapshot context, e.g.:
-  > “Based on snapshot: GLOBAL\_POC\_2026\_01”
+  > “Based on snapshot: GLOBAL_POC_2026_01”
 
 ### LLM explicitly does NOT:
 
@@ -213,4 +219,3 @@ Clear limitations are considered a strength, not a weakness.
 - Governance or consolidation decisions
 
 These are future considerations, not POC requirements.
-

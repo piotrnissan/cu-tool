@@ -1,0 +1,16 @@
+-- Eligible URLs — UK Market
+-- Returns all URLs that meet eligibility criteria for component analysis
+--
+-- Criteria:
+--   - market = 'UK'
+--   - status = 'fetched' (successfully downloaded)
+--   - duplicate_of_id IS NULL (not marked as duplicate)
+--   - html_path IS NOT NULL (HTML file exists)
+--   - html_path NOT LIKE '\\_\\_%' (exclude temp/system files)
+--
+-- Expected result: ~8,468 URLs (as of 2026-01-20)
+--
+-- Usage:
+--   sqlite3 api/data/cu-tool.db < analysis/sql/eligible_urls_uk.sql
+
+-- TODO: Fill in actual query in Sprint 3 (VP-20)

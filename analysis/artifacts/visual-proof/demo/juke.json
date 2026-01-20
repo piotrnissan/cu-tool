@@ -1,0 +1,18 @@
+{
+  "url": "https://www.nissan.co.uk/vehicles/new-vehicles/juke.html",
+  "slug": "juke",
+  "timestamp": "2026-01-20T12:27:42.914Z",
+  "highlights": [
+    {
+      "component_key": "image_carousel",
+      "selector_summary": "section.wds-carousel-section",
+      "bbox": {
+        "x": 0,
+        "y": 6229.65625,
+        "width": 1920,
+        "height": 811.40625
+      },
+      "note": "Detected carousel with 20 images"
+    }
+  ]
+}

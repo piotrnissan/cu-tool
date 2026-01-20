@@ -1,0 +1,18 @@
+{
+  "url": "https://www.nissan.co.uk/vehicles/new-vehicles/juke.html",
+  "slug": "juke.html",
+  "timestamp": "2026-01-20T12:06:31.694Z",
+  "highlights": [
+    {
+      "component_key": "cards_section",
+      "selector_summary": "div.categories-wrapper",
+      "bbox": {
+        "x": 20,
+        "y": -981,
+        "width": 1880,
+        "height": 980
+      },
+      "note": "Detected 5 card-like items"
+    }
+  ]
+}

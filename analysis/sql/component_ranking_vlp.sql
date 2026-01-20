@@ -1,0 +1,21 @@
+-- Component Ranking — VLP (Vehicle Landing Pages)
+-- Returns component prevalence across VLP pages only
+--
+-- VLP definition (UK):
+--   - URL starts with 'https://www.nissan.co.uk/vehicles/new-vehicles'
+--   - OR URL host is 'https://micra.nissan.co.uk/'
+--   - OR URL host is 'https://leaf.nissan.co.uk/'
+--
+-- Output columns:
+--   - component_key: Component type
+--   - pages: Number of VLP pages with this component
+--   - pct_of_eligible_vlp: Percentage of eligible VLP URLs (N / 102 * 100)
+--   - avg_per_page: Average instances per VLP page
+--   - total_instances: Total instances across all VLP pages
+--
+-- Denominator: 102 eligible VLP URLs
+--
+-- Usage:
+--   sqlite3 api/data/cu-tool.db < analysis/sql/component_ranking_vlp.sql
+
+-- TODO: Fill in actual query in Sprint 3 (VP-20)

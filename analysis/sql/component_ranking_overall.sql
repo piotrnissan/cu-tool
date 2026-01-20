@@ -1,0 +1,16 @@
+-- Component Ranking — Overall (UK Market)
+-- Returns component prevalence across all eligible UK URLs
+--
+-- Output columns:
+--   - component_key: Component type (accordion, cards_section, etc.)
+--   - pages: Number of pages with this component
+--   - pct_of_eligible: Percentage of eligible URLs (N / 8,468 * 100)
+--   - avg_per_page: Average instances per page
+--   - total_instances: Total instances across all pages
+--
+-- Denominator: 8,468 eligible URLs
+--
+-- Usage:
+--   sqlite3 api/data/cu-tool.db < analysis/sql/component_ranking_overall.sql
+
+-- TODO: Fill in actual query in Sprint 3 (VP-20)
