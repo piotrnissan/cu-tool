@@ -24,3 +24,8 @@ api/data/
 
 .vscode/settings.json
 SELECT.sql
+
+# Local artifacts
+analysis/artifacts/
+analysis/archive/
+.github/.tmp.md
