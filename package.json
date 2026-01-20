@@ -9,11 +9,14 @@
     "build": "pnpm -r build",
     "lint": "pnpm -r lint",
     "clean": "pnpm -r clean && rm -rf node_modules",
-    "proof:demo": "./api/node_modules/.bin/tsx analysis/visual-proof/runner/demo.ts"
+    "proof:demo": "./api/node_modules/.bin/tsx analysis/visual-proof/runner/demo.ts",
+    "proof:export": "./api/node_modules/.bin/tsx analysis/scripts/export-detections.ts"
   },
   "devDependencies": {
+    "@types/better-sqlite3": "^7.6.9",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@typescript-eslint/parser": "^7.0.0",
+    "better-sqlite3": "^11.0.0",
     "eslint": "^8.56.0",
     "prettier": "^3.2.4",
     "typescript": "^5.3.3"

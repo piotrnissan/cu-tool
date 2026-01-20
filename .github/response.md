@@ -110,9 +110,13 @@ See [docs/visual-proof/quality-gates.md](../docs/visual-proof/quality-gates.md) 
 ## Current Status
 
 **Phase**: Tool Hardening (Phase 1-3 in progress)  
-**Status**: Documentation complete, ready for Sprint 1 implementation
+**Status**: TH-01 complete — JSON export ready for visual proof workflow
 
-**Next step**: TH-01 — Create JSON export script (`analysis/scripts/export-detections.ts`) to export detections from `david_component_usage` table for 5 proof pages.
+**Completed**:
+
+- ✅ TH-01: JSON export script (`pnpm proof:export`) — Exports component detections from SQLite to `analysis/artifacts/visual-proof/detections.json`
+
+**Next step**: TH-02 — Screenshot capture runner (Playwright + locator strategy)
 
 **Blocked**: Component usage analysis, rankings, and conclusions until detector hardening and quality gates complete.
 
@@ -135,3 +139,96 @@ It does NOT contain:
 **For current project status**: See [docs/tracker.md](../docs/tracker.md)  
 **For implementation plan**: See [docs/plan.md](../docs/plan.md)  
 **For v1 component model**: See [docs/methodology.md](../docs/methodology.md)
+
+---
+
+## TH-01: JSON Export Script (2026-01-20)
+
+**What was added**:
+
+- New script: `analysis/scripts/export-detections.ts` — TypeScript export tool using `better-sqlite3`
+- New command: `pnpm proof:export` — Runs the export script from repo root
+- Output file: `analysis/artifacts/visual-proof/detections.json` — Component detections for proof pack URLs
+
+**How to run**:
+
+```bash
+pnpm proof:export
+```
+
+**What it does**:
+
+1. Loads proof pack URL lists from text files (VLP, Editorial, Homepage)
+2. Queries SQLite DB (`api/data/cu-tool.db`) for component detections
+3. Joins `david_component_usage` table with `url_inventory` (market='UK')
+4. Parses evidence strings into structured JSON (best-effort, never fails):
+   - `image_carousel`, `card_carousel`: Extracts `items=[...]`, `controls=yes/no`, `deduped`
+   - `cards_section`: Extracts `sections`, `items_per_section=[...]`
+   - `accordion`: Extracts `items`, `source`
+5. Exports to JSON with proof pack structure, summary stats, and per-URL detections
+
+**Output format**:
+
+```json
+{
+  "generated_at": "<ISO timestamp>",
+  "market": "UK",
+  "proof_pack": { "vlp": [...], "editorial": [...], "homepage": [...] },
+  "summary": {
+    "total_urls_requested": 6,
+    "total_urls_found_in_inventory": 3,
+    "total_urls_with_detections": 3,
+    "total_detection_rows": 5
+  },
+  "urls": [
+    {
+      "url": "<url>",
+      "url_id": <int or null>,
+      "detections": [
+        {
+          "component_key": "<string>",
+          "instance_count": <int>,
+          "confidence": "<string|null>",
+          "evidence_raw": "<string|null>",
+          "evidence_parsed": <object|null>
+        }
+      ]
+    }
+  ]
+}
+```
+
+**Warnings**:
+
+- Prints WARN if URL not found in `url_inventory` (not fetched or analyzed yet)
+- Prints WARN if URL has 0 detections (not analyzed yet)
+- Prints WARN if total URLs ≠ 5 (expected: 2 VLP + 3 Editorial, 5 total)
+
+**Current results** (2026-01-20):
+
+- 6 URLs requested (2 VLP + 3 Editorial + 1 Homepage)
+- 3 URLs found in inventory (2 VLP + 1 Editorial)
+- 3 URLs with detections (all 3 found URLs have detections)
+- 5 total detection rows exported
+
+**Why**:
+Phase 1 (JSON export) enables the visual proof workflow:
+
+- Provides input for screenshot capture (TH-02)
+- Establishes data contract for QA UI (TH-03)
+- Enables reproducible, version-controlled proof pack
+
+**Evidence parsing rationale**:
+
+- Lightweight, best-effort parsing (never throws)
+- Converts string evidence into structured objects for easier consumption
+- Preserves `evidence_raw` always (original source of truth)
+- Enables future extensions without schema changes
+
+**Risks / open questions**:
+
+- 3 URLs not in inventory (not fetched yet) — OK for POC, will be fetched when full UK analysis runs
+- Homepage not analyzed yet — Optional for proof pack, can be excluded from final QA
+
+**Next recommended step**:
+TH-02 — Screenshot capture runner (read detections.json, capture bounding boxes with Playwright)

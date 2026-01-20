@@ -8,9 +8,9 @@
 
 ### Phase 1: JSON Export
 
-- [ ] **TH-01**: Create export script `analysis/scripts/export-detections.ts` (Size: S, Risk: Low)
-- [ ] **TH-02**: Generate `detections.json` for proof pack pages (Size: S, Risk: Low)
-- [ ] **TH-03**: Validate JSON export (Size: S, Risk: Low)
+- ✅ **TH-01**: Create export script `analysis/scripts/export-detections.ts` (Size: S, Risk: Low) — Done 2026-01-20
+- ✅ **TH-02**: Generate `detections.json` for proof pack pages (pipeline verification only; data quality and detector accuracy out of scope) (Size: S, Risk: Low) — Done 2026-01-20
+- ✅ **TH-03**: Validate JSON export (pipeline verification only; data quality and detector accuracy out of scope) (Size: S, Risk: Low) — Done 2026-01-20
 
 ### Phase 2: Proof Runner (Live)
 
@@ -98,5 +98,11 @@
 - Sprint 2: TH-14 to TH-32 (19 tasks, M/L risk, 4-5 days)
 - Sprint 3: TH-33 to TH-42 (10 tasks, M risk, 2-3 days)
 
-**Current status**: Sprint 1 not started
-**Next step**: TH-01 (Create export script)
+**Current status**: Sprint 1 Phase 1 complete (TH-01 to TH-03), Phase 2 starting
+**Next step**: TH-04 (Create proof runner skeleton)
+
+---
+
+## Backlog (Post-POC / Future Enhancements)
+
+- [ ] **TH-01.1**: Optional: backfill `final_url`/`canonical_url` for fetched rows where NULL to enable redirect-based resolution in proof pack export (Size: S, Risk: Low)
