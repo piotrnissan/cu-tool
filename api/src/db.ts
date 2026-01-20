@@ -1,7 +1,6 @@
 import Database from "better-sqlite3";
 import path from "path";
 import fs from "fs";
-import { fileURLToPath } from "url";
 
 // Handle both dev (tsx) and production (compiled) paths
 const isDev = process.env.NODE_ENV !== "production";

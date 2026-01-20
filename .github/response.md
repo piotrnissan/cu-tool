@@ -36,7 +36,7 @@ Replaced `cards_grid` (keyword-based) with `cards_section` (structural detection
 
 **Statistics**:
 
-```
+```text
 cards_section | 70 pages | 0.8% | min=1 | max=4 | avg=1.4 | total=96
 ```
 
@@ -78,7 +78,7 @@ _Historical context: Initial validation showed 42 pages (21%) with cards_section
 
 ## 2. Carousel Detector Hardening
 
-### Overview
+### Overview — Carousel Hardening
 
 Reduced over-counting in image and card carousels through robust nested deduplication, mandatory control validation, and structural verification.
 
@@ -120,7 +120,7 @@ ORDER BY dcu.instance_count DESC
 LIMIT 10;  -- Edit this
 ```
 
-### Detection Algorithm
+### Detection Algorithm — Carousels
 
 **Both carousel types (image_carousel, card_carousel)**:
 
@@ -141,9 +141,9 @@ LIMIT 10;  -- Edit this
 - `image_carousel: N (deduped), items=[2,5,...], controls=yes`
 - `card_carousel: N (deduped), items=[3,4,...], controls`
 
-### Results
+### Results — Carousels
 
-#### Full UK Dataset (8,468 URLs)
+#### Full UK Dataset — Carousels (8,468 URLs)
 
 **Final counts after hardening**:
 

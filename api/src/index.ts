@@ -640,10 +640,12 @@ app.post(
         const max = Number.isFinite(maxBatches) ? maxBatches : undefined;
 
         let batchIndex = 0;
+        let keepRunning = true;
 
-        while (true) {
+        while (keepRunning) {
           if (max !== undefined && batchIndex >= max) {
             console.log(`Reached maxBatches=${max}. Stopping.`);
+            keepRunning = false;
             break;
           }
 
