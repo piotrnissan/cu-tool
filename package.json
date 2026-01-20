@@ -10,7 +10,8 @@
     "lint": "pnpm -r lint",
     "clean": "pnpm -r clean && rm -rf node_modules",
     "proof:demo": "./api/node_modules/.bin/tsx analysis/visual-proof/runner/demo.ts",
-    "proof:export": "./api/node_modules/.bin/tsx analysis/scripts/export-detections.ts"
+    "proof:export": "./api/node_modules/.bin/tsx analysis/scripts/export-detections.ts",
+    "proof:run": "./api/node_modules/.bin/tsx analysis/visual-proof/runner/run.ts"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.9",

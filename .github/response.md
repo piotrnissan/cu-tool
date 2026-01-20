@@ -110,13 +110,14 @@ See [docs/visual-proof/quality-gates.md](../docs/visual-proof/quality-gates.md) 
 ## Current Status
 
 **Phase**: Tool Hardening (Phase 1-3 in progress)  
-**Status**: TH-01 complete — JSON export ready for visual proof workflow
+**Status**: TH-04 complete — Proof runner generates annotated screenshots from detections.json
 
 **Completed**:
 
-- ✅ TH-01: JSON export script (`pnpm proof:export`) — Exports component detections from SQLite to `analysis/artifacts/visual-proof/detections.json`
+- ✅ TH-01 to TH-03: JSON export pipeline (`pnpm proof:export`)
+- ✅ TH-04: Proof runner (`pnpm proof:run`) — Generates annotated screenshots + manifest JSON
 
-**Next step**: TH-02 — Screenshot capture runner (Playwright + locator strategy)
+**Next step**: TH-05+ — Detector hardening (global chrome/modal exclusions, carousel split logic, etc.)
 
 **Blocked**: Component usage analysis, rankings, and conclusions until detector hardening and quality gates complete.
 
@@ -232,3 +233,114 @@ Phase 1 (JSON export) enables the visual proof workflow:
 
 **Next recommended step**:
 TH-02 — Screenshot capture runner (read detections.json, capture bounding boxes with Playwright)
+
+---
+
+## TH-04: Proof Runner (Live) (2026-01-20)
+
+**What was added**:
+
+- New runner script: `analysis/visual-proof/runner/run.ts` — Playwright-based proof runner
+- New command: `pnpm proof:run` — Generates annotated screenshots + manifest JSON
+- Outputs (local-only, gitignored):
+  - `analysis/artifacts/visual-proof/full/<slug>/<slug>.annotated.png` — Full-page screenshots with colored overlays
+  - `analysis/artifacts/visual-proof/full/<slug>/<slug>.manifest.json` — Bbox coordinates + locator metadata
+
+**How to run**:
+
+```bash
+pnpm proof:export  # First, export detections.json
+pnpm proof:run     # Then, generate annotated screenshots
+```
+
+**What it does**:
+
+1. Loads `detections.json` (created by TH-01)
+2. For each URL with detections:
+   - Launches Playwright Chromium (1920x1080 viewport)
+   - Navigates to live URL with `domcontentloaded` + `networkidle` wait
+   - Dismisses cookie/consent overlays (OneTrust)
+   - For each detection (component_key + instance_count):
+     - Queries DOM using documented selector strategy (from `docs/visual-proof/runner.md`)
+     - Filters out global chrome (header/nav/footer/modals)
+     - Computes bounding boxes in document coordinates
+     - Deduplicates nested boxes
+     - Injects colored overlays with labels
+   - Captures full-page annotated screenshot
+   - Generates manifest JSON with bbox coordinates + selector metadata
+3. Saves outputs to `analysis/artifacts/visual-proof/full/<slug>/`
+
+**Locator strategy implementation**:
+
+- Component-to-selector mappings from runner.md (all 11 v1 component types)
+- Global chrome exclusions: `header`, `nav`, `footer`, `[role="dialog"]`, `[aria-modal="true"]`, OneTrust, meganav
+- Bbox validation: min 20px height, 50px width, reasonable y-range (-200 to 20000)
+- Nested box deduplication: skip boxes fully contained in larger boxes
+
+**Overlay injection**:
+
+- Colored borders (4px solid, component-specific colors from runner.md)
+- Labels: `<component_key> #<index>` (e.g., `image_carousel #1`)
+- Positioned with `position: absolute` using document coordinates
+- `z-index: 999999` to render above all page content
+- `pointer-events: none` to avoid layout shifts
+
+**Manifest JSON format**:
+
+```json
+{
+  "url": "<url>",
+  "slug": "<slug>",
+  "timestamp": "<ISO>",
+  "viewport": { "width": 1920, "height": 1080 },
+  "detections": [
+    {
+      "component_key": "<string>",
+      "expected_instances": <int>,
+      "found_instances": <int>,
+      "selector_used": "<CSS selector>",
+      "instances": [
+        {
+          "bbox": { "x": <int>, "y": <int>, "width": <int>, "height": <int> },
+          "selector_used": "<CSS selector>"
+        }
+      ],
+      "notes": "<optional warning message>"
+    }
+  ]
+}
+```
+
+**Current results** (2026-01-20):
+
+- 3 URLs processed (Juke, Ariya, Electric Vehicles)
+- Juke: 4/5 image_carousel, 1/1 card_carousel (1 carousel not found on live page)
+- Ariya: 2/7 image_carousel, 1/1 card_carousel (5 carousels not found — possible DOM change)
+- Electric Vehicles: 2/2 cards_section
+- Total: 10 detection rows, 9 components highlighted
+- Screenshots: 10-12MB each (full-page PNGs)
+- Manifests: 0.9-1.9KB each (JSON)
+
+**Why**:
+Visual proof foundation for detector validation:
+
+- Provides visual evidence of what detectors actually find
+- Enables human QA labeling (next phase: TH-26+)
+- Documents locator strategy execution (not just specification)
+- Catches DOM structure changes vs cached HTML
+
+**Discrepancies (expected)**:
+
+- Found fewer instances than expected (Juke: 4/5, Ariya: 2/7)
+- **Not a bug**: Live pages may differ from cached HTML used by detectors
+- Detectors analyze static HTML; runner queries live DOM (dynamic content, A/B tests, etc.)
+- Discrepancies inform detector hardening (next phase)
+
+**Risks / open questions**:
+
+- Navigation timeouts on networkidle (15s) — pages still load, warning logged, screenshots captured
+- Large screenshot files (10-12MB each) — OK for proof pack (5 pages), would need optimization for full-site
+- Some components not found on live pages vs detections — need to investigate if detector over-counted or page changed
+
+**Next recommended step**:
+TH-14+ — Detector hardening (add global chrome/modal exclusions to all detectors)

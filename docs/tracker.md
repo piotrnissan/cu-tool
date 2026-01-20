@@ -14,14 +14,14 @@
 
 ### Phase 2: Proof Runner (Live)
 
-- [ ] **TH-04**: Create `analysis/visual-proof/runner/full.ts` skeleton (Size: M, Risk: Medium)
-- [ ] **TH-05**: Implement locator strategy for each component type (Size: L, Risk: High)
-- [ ] **TH-06**: Implement global chrome exclusion filter (Size: M, Risk: Medium)
-- [ ] **TH-07**: Implement bbox computation (Size: M, Risk: Medium)
-- [ ] **TH-08**: Implement overlay injection (Size: M, Risk: Low)
-- [ ] **TH-09**: Capture annotated screenshots (Size: S, Risk: Low)
-- [ ] **TH-10**: Generate manifest JSON (Size: M, Risk: Low)
-- [ ] **TH-11**: Test runner on single page (Juke VLP) (Size: M, Risk: Medium)
+- ✅ **TH-04**: Create `analysis/visual-proof/runner/run.ts` (comprehensive implementation) (Size: M, Risk: Medium) — Done 2026-01-20
+- ✅ **TH-05**: Implement locator strategy for each component type (Size: L, Risk: High) — Done 2026-01-20 (integrated in TH-04; pipeline implemented, accuracy not yet validated)
+- ✅ **TH-06**: Implement global chrome exclusion filter (Size: M, Risk: Medium) — Done 2026-01-20 (integrated in TH-04; pipeline implemented, accuracy not yet validated)
+- ✅ **TH-07**: Implement bbox computation (Size: M, Risk: Medium) — Done 2026-01-20 (integrated in TH-04; pipeline implemented, accuracy not yet validated)
+- ✅ **TH-08**: Implement overlay injection (Size: M, Risk: Low) — Done 2026-01-20 (integrated in TH-04; pipeline implemented, accuracy not yet validated)
+- ✅ **TH-09**: Capture annotated screenshots (Size: S, Risk: Low) — Done 2026-01-20 (integrated in TH-04; pipeline implemented, accuracy not yet validated)
+- ✅ **TH-10**: Generate manifest JSON (Size: M, Risk: Low) — Done 2026-01-20 (integrated in TH-04; pipeline implemented, accuracy not yet validated)
+- ✅ **TH-11**: Test runner on single page (Juke VLP) (Size: M, Risk: Medium) — Done 2026-01-20 (validated runner execution on 3 pages: juke, ariya, electric-vehicles)
 
 ### Phase 3: Data Contracts & Documentation
 
@@ -98,8 +98,8 @@
 - Sprint 2: TH-14 to TH-32 (19 tasks, M/L risk, 4-5 days)
 - Sprint 3: TH-33 to TH-42 (10 tasks, M risk, 2-3 days)
 
-**Current status**: Sprint 1 Phase 1 complete (TH-01 to TH-03), Phase 2 starting
-**Next step**: TH-04 (Create proof runner skeleton)
+**Current status**: Sprint 1 Phase 2 complete (TH-04 to TH-11), Phase 3 starting
+**Next step**: TH-12 (Document locator strategy in runner.md) — Already complete, verify completeness
 
 ---
 
