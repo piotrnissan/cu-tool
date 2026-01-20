@@ -94,7 +94,7 @@ interface Evidence {
 **Purpose**: Documents which elements were actually found and highlighted  
 **Format**: JSON object per URL
 
-### Schema
+### Manifest Schema Definition
 
 ```typescript
 interface Manifest {
@@ -125,7 +125,7 @@ interface BoundingBox {
 }
 ```
 
-### Example
+### Manifest Example
 
 ```json
 {
@@ -163,7 +163,7 @@ interface BoundingBox {
 }
 ```
 
-### Constraints
+### Manifest Constraints
 
 - `highlights` array may differ from `detections.json` (runner uses locator strategy, may find more/fewer)
 - `bbox.y` must be positive (document coordinates, not viewport-relative)
@@ -178,7 +178,7 @@ interface BoundingBox {
 **Purpose**: Ground truth for regression gates  
 **Format**: JSONL (newline-delimited JSON, append-only)
 
-### Schema
+### Labels Schema Definition
 
 ```typescript
 interface Label {
@@ -201,7 +201,7 @@ interface BoundingBox {
 }
 ```
 
-### Example (JSONL file content)
+### Labels Example
 
 ```jsonl
 {"url":"https://www.nissan.co.uk/vehicles/new-vehicles/juke.html","component_key":"image_carousel","bbox":{"x":0,"y":6229.65625,"width":1920,"height":811.40625},"label":"confirm","timestamp":"2026-01-20T15:10:42.456Z"}
@@ -214,7 +214,7 @@ interface BoundingBox {
 {"url":"https://www.nissan.co.uk/vehicles/new-vehicles/juke.html","component_key":"tabs","bbox":{"x":50,"y":3400.25,"width":1820,"height":180.5},"label":"wrong","corrected_component_key":"Other","note":"Looks like segmented control not tabs","timestamp":"2026-01-20T15:12:18.789Z"}
 ```
 
-### Constraints
+### Labels Constraints
 
 - **JSONL format**: One JSON object per line, NO array wrapper, NO commas between objects
 - Each line must be valid JSON (parseable in isolation)
@@ -243,7 +243,7 @@ interface BoundingBox {
 
 ## Correlation Between Schemas
 
-```
+```text
 detections.json (DB export)
     ↓
     [ Runner queries live DOM using locator strategy ]

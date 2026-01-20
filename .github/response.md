@@ -1,6 +1,6 @@
 # cu-tool — Operational Log
 
-**⚠️ ANALYSIS FROZEN ⚠️**
+## ⚠️ ANALYSIS FROZEN
 
 This file tracks project status and documentation updates during tool hardening. No component rankings, usage statistics, or conclusions are valid until detector hardening and quality gates are complete.
 

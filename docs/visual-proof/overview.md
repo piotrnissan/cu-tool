@@ -10,8 +10,7 @@ The **Visual Proof Pack** is a validation artifact that provides visual evidence
 
 The proof pack serves as:
 
-- **Validation checkpoint**: Verify detector precision before running full analysis
-
+1. **Validation checkpoint**: Verify detector precision before running full analysis
 2. **Debugging tool**: Visual inspection of what the detectors actually find
 3. **Documentation**: Concrete examples for stakeholders and future developers
 
@@ -19,7 +18,7 @@ The proof pack serves as:
 
 ## Workflow
 
-```
+```text
 DB Export → JSON → Proof Runner → Annotated Screenshots → Human QA → Labels → Regression Gates → Analysis
 ```
 
@@ -80,7 +79,7 @@ Compute precision per component type, validate against thresholds, block analysi
 
 ### Artifacts Directory Structure
 
-```
+```text
 analysis/artifacts/visual-proof/
 ├── detections.json           # DB export (5 URLs, all component instances)
 ├── full/                     # Proof runner outputs

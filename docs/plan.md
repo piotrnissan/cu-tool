@@ -156,7 +156,7 @@
 - **Global chrome + modal exclusions**: Update all detectors to filter header/nav/footer/dialogs/[role="contentinfo"]/[role="banner"]/[role="dialog"]/[aria-modal="true"]
 - **Hero vs promo rule**: Implement top-of-page detection for hero; classify hero-like blocks lower in page as promo_section
 - **Media_text_split variants**: Add media_type classification (image|video|carousel); implement nested carousel no-double-count rule
-- **Carousel split logic**: Separate image_carousel vs card_carousel using item type heuristics (≥1 <img> → image, ≥1 heading → card)
+- **Carousel split logic**: Separate image_carousel vs card_carousel using item type heuristics (≥1 image element → image, ≥1 heading → card)
 - **Cards_section detector**: Require ≥3 card-like items with link+heading/media; exclude footer link sections; ignore AEM grid scaffolding; add card_type classification (model_grade|accessory|offer|generic)
 - **Accordion footer inflation**: Exclude [role="contentinfo"] from accordion detection (expect ~1,800 fewer detections)
 - **Tabs detector**: Verify ARIA role filtering ([role="tablist"]), exclude mega-nav tabs
@@ -175,7 +175,7 @@
 **Acceptance Criteria**:
 
 - All detectors exclude global chrome (header/nav/footer/contentinfo/dialogs)
-- Carousel split logic documented (≥1 <img> → image, ≥1 heading → card)
+- Carousel split logic documented (≥1 image element → image, ≥1 heading → card)
 - Accordion detector skips footer chrome (expect ~1,800 fewer detections)
 - Diff report shows before/after counts per component type
 - New detections.json reflects hardened logic
@@ -478,7 +478,7 @@
 
 ---
 
-## Decision Lock
+## Decision Lock (Confirmation)
 
 **Status**: ✅ All architectural decisions confirmed and documented.
 

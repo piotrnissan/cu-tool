@@ -26,7 +26,7 @@ This POC is intentionally:
 
 ## 1. Snapshot & Coverage
 
-### DONE when:
+### DONE when
 
 - A **single global snapshot** exists (POC scope)
 - Snapshot includes **UK / JP / US** markets
@@ -35,11 +35,11 @@ This POC is intentionally:
 
 Example:
 
-```
+```text
 snapshot_id: GLOBAL_POC_2026_01
 ```
 
-### URL Inventory — DONE when:
+### URL Inventory — DONE when
 
 - Full list of URLs per market is collected
   - primary source: sitemap (or sitemap index)
@@ -65,7 +65,7 @@ Transparency of coverage is sufficient.
 
 ## 2. Fetch & Parsing
 
-### Fetch layer — DONE when:
+### Fetch layer — DONE when
 
 - HTML is fetched for the majority of URLs (target: **80–90%**)
 - Fetch process includes:
@@ -74,7 +74,7 @@ Transparency of coverage is sufficient.
   - ability to resume after interruption
 - HTTP status codes are recorded
 
-### Parsing — DONE when:
+### Parsing — DONE when
 
 - Pages are parsed into **structural sections / blocks**
 - Parsing does **not** depend on:
@@ -94,7 +94,7 @@ Accepted POC limitation:
 
 ## 3. Component Normalisation (Core of the Spike)
 
-### Component Taxonomy v0 — DONE when:
+### Component Taxonomy v0 — DONE when
 
 - A **global list of 8–12 normalised component types** exists
 - Every detected component instance maps to **exactly one** normalised type
@@ -125,14 +125,14 @@ Example (illustrative only):
 
 ## 4. Dataset (Single Source of Truth)
 
-### Dataset v1 — DONE when:
+### Dataset v1 — DONE when
 
 - Data is stored in **one authoritative dataset** (SQLite recommended)
 - Dataset supports aggregation and filtering
 
-### Minimum required fields:
+### Minimum required fields
 
-```
+```text
 snapshot_id
 market
 url
@@ -150,7 +150,7 @@ Dataset must allow:
 
 ## 5. Q&A Interface (LLM-powered, e.g. Ollama)
 
-### Q&A layer — DONE when:
+### Q&A layer — DONE when
 
 - User can ask questions in **natural language**
 - System performs:
@@ -158,12 +158,12 @@ Dataset must allow:
   2. query execution against dataset
   3. response formatting with numbers and evidence
 
-### Mandatory behaviour:
+### Mandatory behaviour
 
 - Every answer includes snapshot context, e.g.:
   > “Based on snapshot: GLOBAL_POC_2026_01”
 
-### LLM explicitly does NOT:
+### LLM explicitly does NOT
 
 - infer missing data
 - calculate numbers itself
@@ -188,7 +188,7 @@ The POC is considered **successful** only if the system can correctly answer all
 
 ## 7. Transparency of Limitations
 
-### DONE when:
+### DONE when (Communication)
 
 - POC is explicitly communicated as:
   - single snapshot

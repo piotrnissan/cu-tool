@@ -1,6 +1,6 @@
 # UK Pre-Hardening Analysis Report (ARCHIVED)
 
-**⚠️ THIS ANALYSIS IS NOT VALID FOR CONCLUSIONS ⚠️**
+## ⚠️ THIS ANALYSIS IS NOT VALID FOR CONCLUSIONS
 
 This document contains pre-hardening component detection results from the initial UK analysis (January 2026). The data was generated BEFORE tool hardening, visual proof validation, and quality gates. Per project methodology, no component rankings or conclusions should be drawn from this data until detector hardening and human QA validation are complete.
 

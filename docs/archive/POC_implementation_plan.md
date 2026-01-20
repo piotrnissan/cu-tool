@@ -4,6 +4,8 @@
 
 **Authoritative v1 tool-hardening docs**: [/docs/plan.md](../plan.md), [/docs/methodology.md](../methodology.md), [/docs/DECISIONS.md](../DECISIONS.md)
 
+<!-- markdownlint-disable MD024 MD040 -->
+
 ---
 
 ## Purpose
@@ -229,7 +231,7 @@ Enable **self-serve insight** without building a traditional dashboard.
 - Dataset aggregations match expectations
 - Coverage and failures are transparent
 
-### Demo readiness means:
+### Demo readiness means
 
 - one snapshot loaded
 - Q&A interface stable
