@@ -212,28 +212,6 @@ pnpm proof:export
 - 3 URLs with detections (all 3 found URLs have detections)
 - 5 total detection rows exported
 
-**Why**:
-Phase 1 (JSON export) enables the visual proof workflow:
-
-- Provides input for screenshot capture (TH-02)
-- Establishes data contract for QA UI (TH-03)
-- Enables reproducible, version-controlled proof pack
-
-**Evidence parsing rationale**:
-
-- Lightweight, best-effort parsing (never throws)
-- Converts string evidence into structured objects for easier consumption
-- Preserves `evidence_raw` always (original source of truth)
-- Enables future extensions without schema changes
-
-**Risks / open questions**:
-
-- 3 URLs not in inventory (not fetched yet) — OK for POC, will be fetched when full UK analysis runs
-- Homepage not analyzed yet — Optional for proof pack, can be excluded from final QA
-
-**Next recommended step**:
-TH-02 — Screenshot capture runner (read detections.json, capture bounding boxes with Playwright)
-
 ---
 
 ## TH-04: Proof Runner (Live) (2026-01-20)
@@ -321,26 +299,22 @@ pnpm proof:run     # Then, generate annotated screenshots
 - Screenshots: 10-12MB each (full-page PNGs)
 - Manifests: 0.9-1.9KB each (JSON)
 
-**Why**:
-Visual proof foundation for detector validation:
+---
 
-- Provides visual evidence of what detectors actually find
-- Enables human QA labeling (next phase: TH-26+)
-- Documents locator strategy execution (not just specification)
-- Catches DOM structure changes vs cached HTML
+## 2026-01-21: TH-14 — Cards Section Detector Hardening
 
-**Discrepancies (expected)**:
+**What changed:**
 
-- Found fewer instances than expected (Juke: 4/5, Ariya: 2/7)
-- **Not a bug**: Live pages may differ from cached HTML used by detectors
-- Detectors analyze static HTML; runner queries live DOM (dynamic content, A/B tests, etc.)
-- Discrepancies inform detector hardening (next phase)
+- `api/src/david-components.ts` — Added intent-based filter to `cards_section` detector to exclude support/owners teasers. Rule: `cards_section` is for product/offers grids only.
 
-**Risks / open questions**:
+**Why:**
+The original detector classified any section with 3+ card-like items as `cards_section`. On `/owners.html`, the "NISSAN SUPPORT" block (Roadside Assistance, Owner Manuals, Customer Services) was incorrectly detected. These are support teasers, not product/offers cards. Filter now uses link href patterns: excludes denylist (`/owners`, `/customer-service`, `/roadside`, `/breakdown`, `/manual`, `/support`), requires allowlist match (`/vehicles`, `/offers`, `/electric-vehicles`, `/finance`, model pages like `/qashqai`, `/juke`, `/ariya`).
 
-- Navigation timeouts on networkidle (15s) — pages still load, warning logged, screenshots captured
-- Large screenshot files (10-12MB each) — OK for proof pack (5 pages), would need optimization for full-site
-- Some components not found on live pages vs detections — need to investigate if detector over-counted or page changed
+**Validation (proof pack after re-analysis):**
 
-**Next recommended step**:
-TH-14+ — Detector hardening (add global chrome/modal exclusions to all detectors)
+- owners.html: `cards_section` 1 → 0 ✅
+- electric-vehicles.html: `cards_section` remains 2 ✅
+- homepage: `cards_section` remains 1 ✅
+- `pnpm proof:export && pnpm proof:run` passed
+
+**Note:** Proof runner processes only URLs with detections. Pages with 0 detections are skipped (expected behavior).

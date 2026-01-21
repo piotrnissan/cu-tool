@@ -618,6 +618,77 @@ function isCardLikeItem(element: Element): boolean {
 }
 
 /**
+ * Check if section contains product/offers-related card links (not support/teaser links)
+ * Cards sections should focus on vehicle/product/offers content, not support/owners teasers.
+ */
+function sectionLooksLikeProductOrOffer(sectionEl: Element): boolean {
+  // Collect all hrefs from card links within the section
+  const links = Array.from(sectionEl.querySelectorAll("a[href]"));
+  const hrefs = links
+    .map((a) => {
+      const href = a.getAttribute("href") || "";
+      // Normalize: lowercase, handle both relative and absolute URLs
+      return href.toLowerCase().trim();
+    })
+    .filter((h) => h.length > 1 && h !== "#"); // Filter out empty and anchor-only links
+
+  if (hrefs.length === 0) return false;
+
+  // Denylist: exclude support/owners/teaser-related paths
+  const denylistPatterns = [
+    "/owners",
+    "/customer-service",
+    "/roadside",
+    "/breakdown",
+    "/manual",
+    "/support",
+    "/contact",
+    "/help",
+  ];
+
+  // Allowlist: include product/offers/vehicle-related paths
+  const allowlistPatterns = [
+    "/vehicles",
+    "/offers",
+    "/electric-vehicles",
+    "/finance",
+    "/business",
+    "/fleet",
+    // Common UK model pages
+    "/qashqai",
+    "/juke",
+    "/ariya",
+    "/leaf",
+    "/x-trail",
+    "/townstar",
+    "/navara",
+    "/gt-r",
+    "/z",
+    "/micra",
+  ];
+
+  let allowlistMatches = 0;
+  let denylistMatches = 0;
+
+  hrefs.forEach((href) => {
+    // Check denylist
+    if (denylistPatterns.some((pattern) => href.includes(pattern))) {
+      denylistMatches++;
+    }
+    // Check allowlist
+    if (allowlistPatterns.some((pattern) => href.includes(pattern))) {
+      allowlistMatches++;
+    }
+  });
+
+  // If any denylist match, exclude this section (support/owners teasers)
+  if (denylistMatches > 0) return false;
+
+  // Require at least 1 allowlist match (product/offers intent)
+  return allowlistMatches >= 1;
+}
+
+/**
  * Detects cards/listing sections (content sections with multiple card-like items)
  * AEM uses "grid" for layout scaffolding, so we count card/listing sections instead.
  */
@@ -656,19 +727,26 @@ function detectCardsSection(dom: JSDOM): ComponentDetection | null {
 
   if (outermost.length === 0) return null;
 
+  // Filter: keep only sections with product/offers intent (not support/teasers)
+  const productOfferSections = outermost.filter((section) =>
+    sectionLooksLikeProductOrOffer(section),
+  );
+
+  if (productOfferSections.length === 0) return null;
+
   // Gather items_per_section for evidence
-  const itemsPerSection = outermost.map((section) => {
+  const itemsPerSection = productOfferSections.map((section) => {
     const cardLikeChildren = Array.from(section.children).filter((child) =>
       isCardLikeItem(child),
     );
     return cardLikeChildren.length;
   });
 
-  const evidence = `cards_section: ${outermost.length} sections, items_per_section=[${itemsPerSection.join(",")}]`;
+  const evidence = `cards_section: ${productOfferSections.length} sections, items_per_section=[${itemsPerSection.join(",")}]`;
 
   return {
     componentKey: "cards_section",
-    instanceCount: outermost.length,
+    instanceCount: productOfferSections.length,
     confidence: "medium",
     evidence,
   };
