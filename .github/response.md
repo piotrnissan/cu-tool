@@ -318,3 +318,73 @@ The original detector classified any section with 3+ card-like items as `cards_s
 - `pnpm proof:export && pnpm proof:run` passed
 
 **Note:** Proof runner processes only URLs with detections. Pages with 0 detections are skipped (expected behavior).
+
+---
+
+## 2026-01-21: TH-14.1 — Global Chrome Exclusions Verification
+
+**What verified:**
+
+- All 7 component detectors (`image_carousel`, `card_carousel`, `accordion`, `cards_section`, `text_image_block`, `cta_bar`, `hero`/`promo_section`) confirmed to have global chrome exclusion filters
+- 5 detectors use `isInGlobalChrome()` directly (card/image carousel, accordion, text_image_block, cta_bar)
+- 2 detectors (cards_section, hero/promo) use `getContentRoot()` which automatically excludes global chrome
+
+**Why:**
+Verification requested after TH-14. No changes required—all detectors already compliant with global chrome exclusion requirement.
+
+**Exclusion patterns:**
+
+- Tags: `header`, `footer`, `nav`, `dialog`
+- Roles: `navigation`, `banner`, `contentinfo`
+- Classes: `header`, `footer`, `navigation`, `cookie`, `modal`, `dialog`
+
+---
+
+## 2026-01-21: TH-15 — Hero vs Promo (Banner) Classification
+
+**What changed:**
+
+- `api/src/david-components.ts` — Added deterministic hero vs promo_section classification based on document position
+- New detector: `detectHeroAndPromo()` returns array of ComponentDetection (replaces old single-hero logic)
+- New helper: `isStickyOrFixed()` checks inline styles and class patterns for sticky/fixed positioning
+- New helper: `isHeroLikeBlock()` identifies hero-like blocks (h1/h2 + img/video + CTA + substantial text)
+
+**Rule implementation:**
+
+- Hero is ONLY allowed for the first content block in normal page flow
+- Content that blocks hero:
+  - Any non-sticky content block (section/article/aside/div with 50+ chars) before first hero-like block
+  - Non-sticky `anchor_nav` (detected via nav/ul/ol with 3+ `<a href="#...">` links and 30+ chars text)
+- Content that does NOT block hero:
+  - Sticky/fixed elements (checked first)
+  - Global chrome elements (header, footer, nav IF sticky or not anchor nav)
+  - AEM layout wrappers
+  - Elements with <30 chars text content
+- All other hero-like blocks beyond the first → classified as `promo_section`
+
+**Why:**
+
+Hero is a specific, high-value block reserved for the page introduction. Promo sections (banners, secondary feature blocks) share visual characteristics but serve different roles. Deterministic position-based rule ensures consistent classification.
+
+**Validation (test suite):**
+
+3 test cases created and executed:
+
+1. Hero at top (sticky nav above) → ✅ 1 hero detected
+2. Hero blocked by non-sticky anchor nav → ✅ 1 promo_section detected
+3. Multiple hero-like blocks → ✅ 1 hero + 1 promo_section detected
+
+`pnpm --filter @cu-tool/api build` → successful compilation
+`pnpm proof:export && pnpm proof:run` → ✅ passed (5 URLs processed, no errors)
+
+**Key technical fix:**
+
+Initial implementation incorrectly searched only within `<main>` element for blocking content. Anchor nav elements outside `<main>` (siblings to main) were not detected. Fixed by searching full document (`doc.body.querySelectorAll("*")`) for blocking content checks while maintaining `contentRoot` scope for hero candidates.
+
+**Current dataset:**
+
+No hero/promo detections in current 6-URL proof pack (VLPs and editorial pages don't have hero-like blocks). Logic validated via unit tests and proof suite passes without errors.
+
+**Next:**
+
+Hero/promo detections will appear when homepage/landing pages with hero blocks are analyzed. Classification follows strict position rule: first hero-like block without preceding non-sticky content = hero; all others = promo_section.

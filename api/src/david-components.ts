@@ -798,6 +798,160 @@ function detectIconGrid(dom: JSDOM): ComponentDetection | null {
 }
 
 /**
+ * Check if element is sticky or fixed positioned
+ */
+function isStickyOrFixed(element: Element): boolean {
+  const style = element.getAttribute("style") || "";
+  const className = element.className || "";
+
+  // Check inline styles
+  if (style.includes("position: sticky") || style.includes("position: fixed")) {
+    return true;
+  }
+
+  // Check common class patterns
+  if (className.includes("sticky") || className.includes("fixed")) {
+    return true;
+  }
+
+  return false;
+}
+
+/**
+ * Helper: Check if element is a hero-like block
+ * Large container with heading + (image OR CTA)
+ */
+function isHeroLikeBlock(element: Element): boolean {
+  // Must have a heading
+  const hasHeading = element.querySelector("h1, h2, [role='heading']") !== null;
+  if (!hasHeading) return false;
+
+  // Must have either image OR CTA/button
+  const hasImage = element.querySelector("img, picture, video") !== null;
+  const hasCTA = element.querySelector("a, button") !== null;
+
+  if (!hasImage && !hasCTA) return false;
+
+  // Require substantial content (avoid small blocks)
+  const textLength = element.textContent?.trim().length || 0;
+  if (textLength < 30) return false;
+
+  return true;
+}
+
+/**
+ * Detects hero and promo_section blocks
+ * Hero = first content block in normal flow
+ * Promo = hero-like blocks that are NOT first
+ */
+function detectHeroAndPromo(dom: JSDOM): ComponentDetection[] {
+  const doc = dom.window.document;
+  const contentRoot = getContentRoot(doc);
+  const results: ComponentDetection[] = [];
+
+  // Get all elements in document order (not just contentRoot) for position checking
+  const allDocElements = Array.from(doc.body.querySelectorAll("*"));
+
+  // Find all hero-like candidates within contentRoot with their DOM positions
+  const candidates: Array<{ element: Element; domIndex: number }> = [];
+
+  contentRoot.querySelectorAll("section, div, article").forEach((container) => {
+    if (isInGlobalChrome(container)) return;
+    if (isAEMLayoutWrapper(container)) return;
+
+    if (isHeroLikeBlock(container)) {
+      const domIndex = allDocElements.indexOf(container);
+      candidates.push({ element: container, domIndex });
+    }
+  });
+
+  if (candidates.length === 0) return results;
+
+  // Sort by DOM order
+  candidates.sort((a, b) => a.domIndex - b.domIndex);
+
+  // Check for blocking content before first candidate
+  const firstCandidate = candidates[0];
+  let hasBlockingContent = false;
+
+  // Check all elements before the first candidate (in full document)
+  for (let i = 0; i < firstCandidate.domIndex; i++) {
+    const el = allDocElements[i];
+
+    // Skip sticky/fixed elements (they don't block)
+    if (isStickyOrFixed(el)) continue;
+
+    // Skip AEM wrappers
+    if (isAEMLayoutWrapper(el)) continue;
+
+    // Check if this element has meaningful content
+    const textLength = el.textContent?.trim().length || 0;
+    const tagName = el.tagName.toLowerCase();
+
+    // Special case: Check for anchor nav BEFORE global chrome check
+    // Anchor nav blocks hero if not sticky, even if it's a <nav> element
+    if (tagName === "nav" || tagName === "ul" || tagName === "ol") {
+      const anchorLinks = el.querySelectorAll('a[href^="#"]');
+      if (anchorLinks.length >= 3 && textLength >= 30) {
+        // It's an anchor nav with content - blocks hero if not sticky
+        hasBlockingContent = true;
+        break;
+      }
+    }
+
+    // Now skip global chrome (after anchor nav check)
+    if (isInGlobalChrome(el)) continue;
+
+    // Skip elements without meaningful content
+    if (textLength < 30) continue;
+
+    // Check for other content blocks (section, div, article, aside, alerts, banners)
+    if (
+      tagName === "section" ||
+      tagName === "article" ||
+      tagName === "aside" ||
+      el.getAttribute("role") === "alert" ||
+      el.getAttribute("role") === "banner"
+    ) {
+      // This is a content block that blocks hero
+      hasBlockingContent = true;
+      break;
+    }
+
+    // Check for div with substantial content
+    if (tagName === "div" && textLength >= 50 && !isAEMLayoutWrapper(el)) {
+      hasBlockingContent = true;
+      break;
+    }
+  }
+
+  // Classify candidates
+  let heroFound = false;
+  candidates.forEach((_candidate) => {
+    if (!heroFound && !hasBlockingContent) {
+      // First candidate with no blocking content = hero
+      results.push({
+        componentKey: "hero",
+        instanceCount: 1,
+        confidence: "medium",
+        evidence: "hero: 1 (first content block)",
+      });
+      heroFound = true;
+    } else {
+      // All others or if blocked = promo_section
+      results.push({
+        componentKey: "promo_section",
+        instanceCount: 1,
+        confidence: "medium",
+        evidence: "promo_section: 1 (not first content block)",
+      });
+    }
+  });
+
+  return results;
+}
+
+/**
  * Main analysis function: runs all detectors
  */
 export function analyzeComponents(html: string): ComponentDetection[] {
@@ -824,6 +978,14 @@ export function analyzeComponents(html: string): ComponentDetection[] {
       console.error(`Detector ${detector.name} failed:`, error);
     }
   });
+
+  // Run hero/promo detector (returns array)
+  try {
+    const heroPromoResults = detectHeroAndPromo(dom);
+    detections.push(...heroPromoResults);
+  } catch (error) {
+    console.error(`Detector detectHeroAndPromo failed:`, error);
+  }
 
   return detections;
 }

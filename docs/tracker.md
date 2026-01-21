@@ -38,7 +38,7 @@
 
 - ✅ **TH-14**: Harden cards_section detector — exclude support/owners teasers; cards_section = product/offers only (intent filter) (Size: M, Risk: Medium) — Done 2026-01-21
 - ✅ **TH-14.1**: Verify global chrome + modal exclusions across all detectors (audit-only; no code changes required) — Verified 2026-01-21
-- [ ] **TH-15**: Implement hero vs promo rule (top-of-page hero only) (Size: M, Risk: Medium)
+- ✅ **TH-15**: Implement hero vs promo rule (top-of-page hero only) (Size: M, Risk: Medium)
 - [ ] **TH-16**: Implement media_text_split with media_type variants (image|video|carousel) + nested carousel no-double-count (Size: L, Risk: High)
 - [ ] **TH-17**: Implement carousel split logic (image_carousel vs card_carousel) (Size: M, Risk: High)
 - [ ] **TH-18**: Harden cards_section detector (≥3 cards, exclude footer, ignore AEM grids, add card_type classification) (Size: L, Risk: High)
@@ -100,7 +100,7 @@
 - Sprint 3: TH-33 to TH-42 (10 tasks, M risk, 2-3 days)
 
 **Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 ready to start
-**Next step**: TH-15 (Implement hero vs promo rule — top-of-page hero only)
+**Next step**: TH-16 (Implement media_text_split with media_type variants (image|video|carousel) + nested carousel no-double-count)
 
 ---
 
