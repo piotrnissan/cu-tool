@@ -262,6 +262,62 @@ function detectAnchorNav(dom: JSDOM): ComponentDetection | null {
 }
 
 /**
+ * Helper: Check if element is within a media_text_split block
+ * Used to prevent double-counting nested carousels
+ */
+function isWithinMediaTextSplit(element: Element): boolean {
+  // Check if element has a parent that looks like media_text_split
+  // Media_text_split containers have specific structural patterns:
+  // - 2-column layout (grid/flex with 2 children)
+  // - One side has media, other has text
+
+  let current = element.parentElement;
+  while (current) {
+    // Skip AEM wrappers
+    if (isAEMLayoutWrapper(current)) {
+      current = current.parentElement;
+      continue;
+    }
+
+    // Check if this container looks like media_text_split
+    const children = Array.from(current.children).filter(
+      (child) => !isAEMLayoutWrapper(child as Element),
+    );
+
+    if (children.length === 2) {
+      // Check if one child has media and other has text (>100 chars)
+      const child1 = children[0] as Element;
+      const child2 = children[1] as Element;
+
+      const child1HasMedia =
+        child1.querySelector("img, video, iframe") !== null ||
+        child1.querySelector('[class*="carousel"]') !== null ||
+        child1.querySelector('[class*="slider"]') !== null;
+
+      const child2HasMedia =
+        child2.querySelector("img, video, iframe") !== null ||
+        child2.querySelector('[class*="carousel"]') !== null ||
+        child2.querySelector('[class*="slider"]') !== null;
+
+      const child1Text = child1.textContent?.trim().length || 0;
+      const child2Text = child2.textContent?.trim().length || 0;
+
+      // One side media, other side text
+      if (
+        (child1HasMedia && child2Text >= 100) ||
+        (child2HasMedia && child1Text >= 100)
+      ) {
+        return true;
+      }
+    }
+
+    current = current.parentElement;
+  }
+
+  return false;
+}
+
+/**
  * Helper: Check if element has carousel navigation/pagination controls
  */
 function hasCarouselControls(element: Element): boolean {
@@ -362,6 +418,9 @@ function detectImageCarousel(dom: JSDOM): ComponentDetection | null {
   const imageCarousels: Array<{ element: Element; imageCount: number }> = [];
 
   deduped.forEach((container) => {
+    // Skip if nested within media_text_split (no double-count)
+    if (isWithinMediaTextSplit(container)) return;
+
     // Require >=2 images
     const images = container.querySelectorAll("img, picture img");
     if (images.length < 2) return;
@@ -493,6 +552,8 @@ function detectCardCarousel(dom: JSDOM): ComponentDetection | null {
   }> = [];
 
   deduped.forEach((container) => {
+    // Skip if nested within media_text_split (no double-count)
+    if (isWithinMediaTextSplit(container)) return;
     // Loosened card-like item validation:
     // Look for card-like items (direct children OR deeper descendants)
     // - Each item must have: link (a[href]) AND (heading h2-h6 OR media)
@@ -798,6 +859,131 @@ function detectIconGrid(dom: JSDOM): ComponentDetection | null {
 }
 
 /**
+ * Helper: Check if element has media content (image/video/carousel)
+ * Returns media_type: 'carousel' | 'video' | 'image' | null
+ */
+function hasMediaContent(element: Element): string | null {
+  // Check for carousel first (highest priority)
+  const carouselIndicators = element.querySelectorAll(
+    '[class*="carousel"], [class*="slider"], [class*="swiper"], [class*="slick"], ' +
+      '.swiper-pagination, .slick-dots, [class*="pagination"], [class*="dots"]',
+  );
+  if (carouselIndicators.length > 0) {
+    return "carousel";
+  }
+
+  // Check for video
+  const videoElement = element.querySelector("video");
+  if (videoElement) {
+    return "video";
+  }
+
+  // Check for video iframe (YouTube, Vimeo)
+  const iframes = element.querySelectorAll("iframe");
+  for (const iframe of Array.from(iframes)) {
+    const src = iframe.getAttribute("src") || "";
+    if (
+      src.includes("youtube.com") ||
+      src.includes("youtu.be") ||
+      src.includes("vimeo.com") ||
+      src.includes("player.vimeo.com")
+    ) {
+      return "video";
+    }
+  }
+
+  // Check for image
+  const imgElement = element.querySelector("img, picture");
+  if (imgElement) {
+    return "image";
+  }
+
+  // Check for background-image
+  const style = (element as HTMLElement).style;
+  if (style.backgroundImage && style.backgroundImage !== "none") {
+    return "image";
+  }
+
+  // Check computed/inline background-image on media wrappers
+  const mediaWrappers = element.querySelectorAll(
+    '[class*="media"], [class*="image"], [class*="picture"], [class*="visual"]',
+  );
+  for (const wrapper of Array.from(mediaWrappers)) {
+    const wrapperStyle = (wrapper as HTMLElement).style;
+    if (
+      wrapperStyle.backgroundImage &&
+      wrapperStyle.backgroundImage !== "none"
+    ) {
+      return "image";
+    }
+  }
+
+  return null;
+}
+
+/**
+ * Detects media_text_split blocks (two-column layout: media + text)
+ * Assigns media_type variant: image | video | carousel
+ */
+function detectMediaTextSplit(dom: JSDOM): ComponentDetection | null {
+  const doc = dom.window.document;
+  const contentRoot = getContentRoot(doc);
+
+  const splits: Array<{ element: Element; mediaType: string }> = [];
+
+  // Find potential split containers
+  // Look for sections, divs, articles with 2-column structure
+  contentRoot.querySelectorAll("section, div, article").forEach((container) => {
+    if (isInGlobalChrome(container)) return;
+    if (isAEMLayoutWrapper(container)) return;
+
+    // Get non-wrapper children
+    const children = Array.from(container.children).filter(
+      (child) => !isAEMLayoutWrapper(child as Element),
+    );
+
+    // Must have exactly 2 children for split layout
+    if (children.length !== 2) return;
+
+    const child1 = children[0] as Element;
+    const child2 = children[1] as Element;
+
+    // Check media content in each child
+    const child1MediaType = hasMediaContent(child1);
+    const child2MediaType = hasMediaContent(child2);
+
+    // Get text content length
+    const child1Text = child1.textContent?.trim().length || 0;
+    const child2Text = child2.textContent?.trim().length || 0;
+
+    // Pattern 1: child1 has media, child2 has text
+    if (child1MediaType && child2Text >= 100) {
+      splits.push({ element: container, mediaType: child1MediaType });
+      return;
+    }
+
+    // Pattern 2: child2 has media, child1 has text
+    if (child2MediaType && child1Text >= 100) {
+      splits.push({ element: container, mediaType: child2MediaType });
+      return;
+    }
+  });
+
+  if (splits.length === 0) return null;
+
+  // Count media_type variants
+  const mediaTypes = splits.map((s) => s.mediaType);
+  const mediaTypeList = mediaTypes.join(",");
+
+  return {
+    componentKey: "media_text_split",
+    instanceCount: splits.length,
+    confidence: "medium",
+    evidence: `media_text_split: ${splits.length} blocks, media_types=[${mediaTypeList}]`,
+  };
+}
+
+/**
  * Check if element is sticky or fixed positioned
  */
 function isStickyOrFixed(element: Element): boolean {
@@ -966,6 +1152,7 @@ export function analyzeComponents(html: string): ComponentDetection[] {
     detectCardCarousel,
     detectCardsSection, // Renamed from detectCardsGrid
     detectIconGrid,
+    detectMediaTextSplit,
   ];
 
   detectors.forEach((detector) => {
