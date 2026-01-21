@@ -37,7 +37,7 @@
 **Execution Order**: All 11 component types (v1 model) in priority sequence by corruption risk
 
 - ✅ **TH-14**: Harden cards_section detector — exclude support/owners teasers; cards_section = product/offers only (intent filter) (Size: M, Risk: Medium) — Done 2026-01-21
-- [ ] **TH-14.1**: Add global chrome + modal exclusions to all detectors ([role="dialog"], [aria-modal="true"]) (Size: L, Risk: Medium)
+- 🔄 **TH-14.1**: Add global chrome + modal exclusions to all detectors ([role="dialog"], [aria-modal="true"]) (Size: L, Risk: Medium)
 - [ ] **TH-15**: Implement hero vs promo rule (top-of-page hero only) (Size: M, Risk: Medium)
 - [ ] **TH-16**: Implement media_text_split with media_type variants (image|video|carousel) + nested carousel no-double-count (Size: L, Risk: High)
 - [ ] **TH-17**: Implement carousel split logic (image_carousel vs card_carousel) (Size: M, Risk: High)
