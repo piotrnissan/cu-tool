@@ -25,8 +25,8 @@
 
 ### Phase 3: Data Contracts & Documentation
 
-- [ ] **TH-12**: Document locator strategy in `docs/visual-proof/runner.md` (Size: M, Risk: Low)
-- [ ] **TH-13**: Define JSON contracts in `docs/visual-proof/data-contracts.md` (Size: M, Risk: Low)
+- ✅ **TH-12**: Document locator strategy in `docs/visual-proof/runner.md` (Size: M, Risk: Low) — Verified 2026-01-21 (docs complete; accuracy validated later)
+- ✅ **TH-13**: Define JSON contracts in `docs/visual-proof/data-contracts.md` (Size: M, Risk: Low) — Verified 2026-01-21 (contracts complete; export/QA will enforce)
 
 ---
 
@@ -98,8 +98,8 @@
 - Sprint 2: TH-14 to TH-32 (19 tasks, M/L risk, 4-5 days)
 - Sprint 3: TH-33 to TH-42 (10 tasks, M risk, 2-3 days)
 
-**Current status**: Sprint 1 Phase 2 complete (TH-04 to TH-11), Phase 3 starting
-**Next step**: TH-12 (Document locator strategy in runner.md) — Already complete, verify completeness
+**Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 ready to start
+**Next step**: TH-14 (Add global chrome + modal exclusions to all detectors)
 
 ---
 

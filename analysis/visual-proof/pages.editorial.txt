@@ -3,5 +3,4 @@
 # Count: 2-3 pages
 
 https://www.nissan.co.uk/experience-nissan/electric-vehicles.html
-https://www.nissan.co.uk/ownership.html
-https://www.nissan.co.uk/experience-nissan/events/pop-up-event.html
+https://www.nissan.co.uk/owners.html

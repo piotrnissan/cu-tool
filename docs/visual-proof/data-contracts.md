@@ -8,82 +8,111 @@ This document defines the three JSON contracts used in the visual proof + human 
 
 **Source**: Exported from `david_component_usage` + `url_inventory` tables  
 **Purpose**: Input to proof runner (maps DB detections to live DOM)  
-**Format**: JSON array of URL records
+**Format**: Single JSON object (NOT array, NOT JSONL)
 
 ### Schema
 
 ```typescript
-interface Detection {
-  url: string; // Full URL (https://...)
+interface DetectionsExport {
+  generated_at: string; // ISO 8601 timestamp
   market: string; // "UK"
-  slug: string; // Derived from URL (e.g., "juke", "electric-vehicles")
-  components: ComponentInstance[];
+  proof_pack: {
+    vlp: string[]; // VLP URLs
+    editorial: string[]; // Editorial URLs
+    homepage: string[]; // Homepage URLs (optional)
+  };
+  summary: {
+    total_urls_requested: number;
+    total_urls_found_in_inventory: number;
+    total_urls_with_detections: number;
+    total_detection_rows: number;
+  };
+  urls: UrlDetection[];
 }
 
-interface ComponentInstance {
+interface UrlDetection {
+  url: string; // Full URL (https://...)
+  url_id: number | null; // Null if URL not in inventory
+  detections: ComponentDetection[];
+}
+
+interface ComponentDetection {
   component_key: string; // One of v1 model: hero, promo_section, media_text_split, info_specs, next_action_panel, image_carousel, card_carousel, cards_section, accordion, tabs, anchor_nav
   instance_count: number; // Number of instances detected on page
-  evidence: Evidence; // Parsed from evidence string in DB
-  media_type?: string; // For media_text_split: image | video | carousel
-  card_type?: string; // For cards_section/card_carousel: model_grade | accessory | offer | generic
+  confidence: string | null; // "high" | "medium" | "low" | null
+  evidence_raw: string | null; // Raw evidence string from DB
+  evidence_parsed: EvidenceParsed | null; // Parsed evidence object (best-effort)
 }
 
-interface Evidence {
+interface EvidenceParsed {
   // Common fields
   deduped?: boolean; // Whether duplicates were removed
-  controls?: boolean | string; // "yes" | "no" | true | false
+  controls?: string; // "yes" | "no"
+  scrollable?: boolean; // For carousels
 
   // Carousel-specific
   items?: number[]; // Array of item counts per carousel instance
 
-  // Accordion-specific
-  total_accordions?: number; // Total count
-
   // Cards section-specific
   sections?: number; // Number of card sections
+  items_per_section?: number[]; // Items per section
 
-  // Tabs-specific
-  tabs_count?: number; // Number of tab sets
+  // Accordion-specific
+  items?: number; // Total accordion items
+  source?: string; // "details" | "aria-controls"
 }
 ```
 
 ### Example
 
 ```json
-[
-  {
-    "url": "https://www.nissan.co.uk/vehicles/new-vehicles/juke.html",
-    "market": "UK",
-    "slug": "juke",
-    "components": [
-      {
-        "component_key": "image_carousel",
-        "instance_count": 5,
-        "evidence": {
-          "deduped": true,
-          "items": [20, 6, 6, 8, 6],
-          "controls": "yes"
+{
+  "generated_at": "2026-01-20T16:06:34.948Z",
+  "market": "UK",
+  "proof_pack": {
+    "vlp": [
+      "https://www.nissan.co.uk/vehicles/new-vehicles/juke.html",
+      "https://www.nissan.co.uk/vehicles/new-vehicles/ariya.html"
+    ],
+    "editorial": [
+      "https://www.nissan.co.uk/experience-nissan/electric-vehicles.html"
+    ],
+    "homepage": []
+  },
+  "summary": {
+    "total_urls_requested": 3,
+    "total_urls_found_in_inventory": 3,
+    "total_urls_with_detections": 3,
+    "total_detection_rows": 5
+  },
+  "urls": [
+    {
+      "url": "https://www.nissan.co.uk/vehicles/new-vehicles/juke.html",
+      "url_id": 64,
+      "detections": [
+        {
+          "component_key": "image_carousel",
+          "instance_count": 5,
+          "confidence": "medium",
+          "evidence_raw": "image_carousel: 5 (deduped), items=[20,6,6,8,6], controls=yes",
+          "evidence_parsed": {
+            "items": [20, 6, 6, 8, 6],
+            "controls": "yes",
+            "deduped": true
+          }
         }
-      },
-      {
-        "component_key": "card_carousel",
-        "instance_count": 1,
-        "evidence": {
-          "deduped": true,
-          "items": [6],
-          "controls": true
-        }
-      }
-    ]
-  }
-]
+      ]
+    }
+  ]
+}
 ```
 
 ### Constraints
 
-- Array contains exactly 5 objects (2 VLP + 3 Editorial)
-- Each `component_key` must be valid taxonomy key
-- `instance_count` must match length of `evidence.items` array (if present)
+- Single JSON object (not array)
+- `urls` array contains all requested proof pack URLs (including those with 0 detections)
+- Each `component_key` must be valid v1 taxonomy key
+- `evidence_parsed` is best-effort (may be null if parsing fails)
 - File size < 50KB
 
 ---

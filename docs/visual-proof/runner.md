@@ -6,7 +6,7 @@ The **Proof Runner** (`analysis/visual-proof/runner/full.ts`) renders bounding b
 
 ## Execution Flow
 
-```
+```text
 1. Load detections.json
 2. For each URL:
    a. Launch Playwright browser (chromium, 1920x1080 viewport)
@@ -29,6 +29,10 @@ The **Proof Runner** (`analysis/visual-proof/runner/full.ts`) renders bounding b
 ## Locator Strategy
 
 Maps `component_key` (from detections.json) to CSS selector patterns. Each component type has a specific query.
+
+**Important**: The locator strategy is **permissive by design**. It may find more or fewer instances than the detector reported. Accuracy is validated later via human QA + quality gates (Phase 5-6), not during runner execution.
+
+**Content Root**: Queries are scoped to the page's main content area (typically `<main>`, `[role="main"]`, or `<body>` as fallback). Elements inside global chrome containers (header/nav/footer) are filtered out post-query.
 
 ### Component-to-Selector Mapping (v1 Model)
 
@@ -211,13 +215,19 @@ async function getBoundingBox(element: ElementHandle): Promise<BoundingBox> {
 
 If validation fails, skip element and log warning.
 
+**Deduplication**: After computing bboxes for a component_key, remove nested boxes:
+
+- If `bbox_A` is fully contained within `bbox_B` (same component type), skip `bbox_A`
+- Prevents double-counting when DOM has nested carousel/accordion structures
+- Applied per component_key (image_carousel boxes don't dedupe card_carousel boxes)
+
 ---
 
 ## Overlay Injection
 
 **Purpose**: Render colored bounding boxes on top of detected components for visual QA.
 
-### Implementation
+### Overlay Implementation
 
 ```typescript
 async function injectOverlay(
@@ -289,7 +299,7 @@ function getColorForComponent(componentKey: string): string {
 
 ## Expected Output Directory Structure
 
-```
+```text
 analysis/artifacts/visual-proof/full/
 ├── juke/
 │   ├── juke.annotated.png         # Full-page screenshot with overlays

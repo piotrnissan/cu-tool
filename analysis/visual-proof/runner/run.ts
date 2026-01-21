@@ -246,7 +246,17 @@ async function injectOverlay(
   index: number,
 ): Promise<void> {
   await page.evaluate(
-    ({ bbox, componentKey, index, color }) => {
+    ({
+      bbox,
+      componentKey,
+      index,
+      color,
+    }: {
+      bbox: BoundingBox;
+      componentKey: string;
+      index: number;
+      color: string;
+    }) => {
       const overlay = document.createElement("div");
       overlay.style.position = "absolute";
       overlay.style.left = `${bbox.x}px`;
@@ -299,12 +309,18 @@ async function findComponentInstances(
   try {
     // Query all matching elements
     const elements = await page.evaluate(
-      ({ selector, globalChromeSelectors }) => {
+      ({
+        selector,
+        globalChromeSelectors,
+      }: {
+        selector: string;
+        globalChromeSelectors: string[];
+      }) => {
         const candidates = Array.from(document.querySelectorAll(selector));
 
         // Filter out global chrome
         const filtered = candidates.filter((el) => {
-          return !globalChromeSelectors.some((chromeSelector) => {
+          return !globalChromeSelectors.some((chromeSelector: string) => {
             try {
               return el.closest(chromeSelector) !== null;
             } catch {
