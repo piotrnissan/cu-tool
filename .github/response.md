@@ -664,4 +664,74 @@ Nissan pages use full-width CTA sections to guide users to conversion actions (e
 
 **Note:**
 
-No next_action_panel detections in current proof pack. This is expected if proof pack URLs do not contain full-width CTA sections (variant A/B), or if HTML cache predates the detector. Detection accuracy will be validated during human QA phase.
+## No next_action_panel detections in current proof pack. This is expected if proof pack URLs do not contain full-width CTA sections (variant A/B), or if HTML cache predates the detector. Detection accuracy will be validated during human QA phase.
+
+## TH-23: Implement `anchor_nav` Detector (2026-01-22)
+
+### What changed
+
+Single file modified: [api/src/david-components.ts](../api/src/david-components.ts)
+
+**Replaced existing `detectAnchorNav()` function (lines 228-267) with hardened implementation:**
+
+- **Expanded container types**: Now searches `nav, ul, ol, section, div` (was: `nav, ul, ol` only)
+- **Generic anchor exclusions**: Added denylist `["#", "#top", "#main", "#content", "#skip"]`
+- **Link label validation**: Enforces 2-40 character length requirement (after trimming)
+- **Footer exclusion**: Added explicit `closest('footer, [role="contentinfo"]')` check
+- **Tabs exclusion**: Added `closest('[role="tablist"]')` check to exclude anchor links within tab contexts
+- **Accordion exclusion**: Added `closest('details')` check to exclude accordion-related anchors
+- **TOC exclusion**: Detects and excludes "Contents" / "Table of contents" blocks using case-insensitive pattern matching:
+  - Checks container text for TOC markers (with length <200 constraint)
+  - Checks nearby headings for TOC text
+- **Evidence format**: Changed to `anchor_nav: N links, sample=[#overview,#specs,#charging]` (shows first 3 valid anchors)
+- **Confidence downgrade**: Changed from `high` to `medium` (precision-first approach with conservative heuristics)
+
+### Why
+
+**Problem**: Original `detectAnchorNav()` had low precision, producing false positives from:
+
+1. TOC blocks (editorial "Contents" navigation)
+2. Generic utility anchors (`#`, `#top`, `#main`)
+3. Accordion/tabs UI anchors (not content flow navigation)
+4. Footer navigation (excluded by design in v1)
+
+**Solution**: Applied strict detection rules per TH-23 spec to ensure only real in-page content navigation is detected. Detector now distinguishes anchor_nav (page flow navigation) from TOC, UI controls, and footer links.
+
+### Evidence / Validation
+
+**Build validation:**
+
+```bash
+pnpm --filter @cu-tool/api build
+# Result: TypeScript compilation successful, no errors
+```
+
+**Linting:**
+
+```bash
+pnpm lint
+# Result: No ESLint warnings or errors (api + web passed)
+```
+
+**Export validation:**
+
+```bash
+pnpm proof:export
+# Result: 6 URLs loaded, 5 with detections, 8 total detection rows
+```
+
+**Proof runner validation:**
+
+```bash
+pnpm proof:run
+# Result: All 5 pages processed successfully
+# - Juke: 4 image_carousel, 1 card_carousel
+# - Ariya: 2 image_carousel, 1 card_carousel
+# - Qashqai: 3 image_carousel, 1 card_carousel
+# - Electric vehicles: 2 cards_section
+# - Homepage: 1 cards_section
+```
+
+**Note:**
+
+No `anchor_nav` detections in current proof pack. This is expected if proof pack URLs do not contain in-page anchor navigation blocks (e.g., UK VLP pages may not have anchor nav sections), or if HTML cache predates the detector. Detection accuracy will be validated during human QA phase (TH-26 to TH-32).

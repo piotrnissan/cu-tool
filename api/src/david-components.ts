@@ -224,45 +224,105 @@ function detectAccordion(dom: JSDOM): ComponentDetection | null {
 
 /**
  * Detects anchor navigation (in-page nav with href="#..." patterns)
+ * Hardened for precision: excludes TOC, tabs, accordion contexts
  */
 function detectAnchorNav(dom: JSDOM): ComponentDetection | null {
   const doc = dom.window.document;
   const contentRoot = getContentRoot(doc);
 
-  // Find nav/list elements inside content root
+  // Generic anchors to exclude
+  const GENERIC_ANCHORS = ["#", "#top", "#main", "#content", "#skip"];
+
+  // Find potential anchor nav containers (expanded to include section, div)
   const candidates: Element[] = [];
 
-  contentRoot.querySelectorAll("nav, ul, ol").forEach((container) => {
-    // Exclude global chrome
-    if (isInGlobalChrome(container)) return;
+  contentRoot
+    .querySelectorAll("nav, ul, ol, section, div")
+    .forEach((container) => {
+      // Exclude global chrome
+      if (isInGlobalChrome(container)) return;
 
-    const anchorLinks = container.querySelectorAll('a[href^="#"]');
-    if (anchorLinks.length < 3) return;
+      // Exclude footer explicitly
+      if (container.closest('footer, [role="contentinfo"]')) return;
 
-    // Verify at least 50% of anchor targets exist in the DOM
-    const validAnchors = Array.from(anchorLinks).filter((link) => {
-      const href = link.getAttribute("href");
-      if (!href || href === "#") return false;
-      const targetId = href.slice(1);
-      return doc.getElementById(targetId) !== null;
-    });
+      // Exclude tabs context
+      if (container.closest('[role="tablist"]')) return;
 
-    if (validAnchors.length >= 3) {
+      // Exclude accordion context (details element or aria-expanded pattern)
+      if (container.closest("details")) return;
+
+      // Get all anchor links
+      const anchorLinks = Array.from(
+        container.querySelectorAll('a[href^="#"]'),
+      ) as HTMLAnchorElement[];
+
+      if (anchorLinks.length < 3) return;
+
+      // Filter valid anchor links
+      const validAnchors = anchorLinks.filter((link) => {
+        const href = link.getAttribute("href");
+        if (!href) return false;
+
+        // Exclude generic anchors
+        if (GENERIC_ANCHORS.includes(href.toLowerCase())) return false;
+
+        // Verify target exists
+        const targetId = href.slice(1);
+        const targetExists = doc.getElementById(targetId) !== null;
+        if (!targetExists) return false;
+
+        // Check label length (2-40 chars after trimming)
+        const labelText = link.textContent?.trim() || "";
+        if (labelText.length < 2 || labelText.length > 40) return false;
+
+        return true;
+      });
+
+      // Need at least 3 valid anchors
+      if (validAnchors.length < 3) return;
+
+      // Exclude TOC blocks (check for "Contents" or "Table of contents" text)
+      // Check container text and nearby headings
+      const containerText = container.textContent?.toLowerCase() || "";
+      const isTOC =
+        /\b(contents|table\s+of\s+contents)\b/i.test(containerText) &&
+        containerText.length < 200; // TOC markers are typically short
+
+      if (isTOC) return;
+
+      // Additional TOC check: look for nearby heading with TOC text
+      const nearbyHeading = container.querySelector(
+        "h1, h2, h3, h4, h5, h6, [role='heading']",
+      );
+      if (nearbyHeading) {
+        const headingText = nearbyHeading.textContent?.toLowerCase() || "";
+        if (/\b(contents|table\s+of\s+contents)\b/i.test(headingText)) {
+          return;
+        }
+      }
+
       candidates.push(container);
-    }
-  });
+    });
 
   if (candidates.length === 0) return null;
 
-  const totalAnchors = candidates.reduce((sum, el) => {
-    return sum + el.querySelectorAll('a[href^="#"]').length;
-  }, 0);
+  // Gather sample hrefs for evidence (first 3 unique anchors)
+  const firstCandidate = candidates[0];
+  const anchorLinks = Array.from(
+    firstCandidate.querySelectorAll('a[href^="#"]'),
+  ) as HTMLAnchorElement[];
+  const sampleHrefs = anchorLinks
+    .map((link) => link.getAttribute("href"))
+    .filter((href) => href && !GENERIC_ANCHORS.includes(href.toLowerCase()))
+    .slice(0, 3);
+
+  const evidence = `anchor_nav: ${anchorLinks.length} links, sample=[${sampleHrefs.join(",")}]`;
 
   return {
     componentKey: "anchor_nav",
     instanceCount: candidates.length,
-    confidence: "high",
-    evidence: `${candidates.length} in-page nav(s) with ${totalAnchors} anchors (in content)`,
+    confidence: "medium",
+    evidence,
   };
 }
 
