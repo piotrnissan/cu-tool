@@ -1,72 +1,99 @@
 # cu-tool — Copilot / AI Agent Instructions
 
-## Big picture (Tech Spike 2 POC)
+## Project context (source of truth)
 
-A lightweight **component-usage** analyzer for Nissan market sites. Flow:
-**sitemap URL inventory → resumable fetch (HTML-first, Playwright fallback) → store metadata in SQLite → later: component parsing + Q&A**.
+This repo is the source of truth: **cu-tool** (pnpm monorepo).
 
-## Hard constraints (POC)
+Current focus: **Sprint 2 — Detector Hardening** (TH-14+).
+Primary goal: build a **reliable component detection + visual proof + human QA** workflow for Nissan pages (starting with UK VLP + editorial).
 
-- **Single snapshot**, no real-time monitoring, no dashboards.
-- **CMS-agnostic**: do not rely on AEM/Storyblok internals; work from public HTML/DOM.
-- Prefer deterministic, resumable jobs; transparency of coverage > perfection.
+Do not perform speculative usage analysis until detectors are hardened and QA gates pass.
 
-## Repo structure
+## Hard constraints
 
-- `api/` Express + TS API (port **3002**)
-- `web/` Next.js UI
-- Docs: `POC_DoD.md`, `POC_implementation_plan.md`, `POC_component_taxonomy_v_0.md`, `POC_technical_environment_rendering_strategy.md`
+- **No speculative analysis** (no rankings, no conclusions, no “insights” beyond verified evidence).
+- **No creative refactors**. Make minimal, incremental changes only.
+- **One task / one component at a time**.
+- **No code changes unless explicitly requested** by the user (or by a task prompt).
+- **Tracker must reflect reality**. Never mark tasks done unless verified by evidence.
 
-## Developer workflows
+## Repo structure (high level)
 
-- Install: `pnpm install`
-- Build: `pnpm -r build`
-- Lint: `pnpm -r lint`
-- Dev: `pnpm dev` (runs api+web)
+- `api/` — Express + TypeScript API (port 3002)
+- `web/` — Next.js UI
+- `docs/` — authoritative documentation (plan, methodology, decisions, tracker, visual-proof docs)
+- `.github/response.md` — canonical operational log (authoritative)
 
-## Data store (single source of truth)
+## Data & safety rules (very important)
 
-SQLite DB: `api/data/cu-tool.db`.
-Main table (current phase): `url_inventory` with key fields:
+- Never commit local datasets/caches or secrets:
+  - `api/data/*` (SQLite DB), `api/data/html/*` (HTML cache), `*.db`, `*.db-wal`, `*.db-shm`, `*.html.gz`, `.env*`, `logs/`
+- Avoid adding temporary scripts or debug files.
+  - If local debugging is necessary, use ephemeral commands only and do not create tracked files.
+- Avoid `git add .` — always stage files explicitly.
 
-- `market`, `url`, `discovered_from`, `status` (`pending|fetched|failed|skipped`)
-- `http_status`, `fetched_at`, `render_mode` (`html|headless`), `error_message`
-- Dedup support: `final_url`, `canonical_url`, `content_hash`, `duplicate_of_id`
+## Key workflows (baseline validation gates)
 
-## Key API endpoints
+When a task changes detectors or export/proof behavior, validation must include:
 
-- `GET /health` (API healthcheck)
-- `GET /api/inventory/build?market=UK&base=https://www.nissan.co.uk` (sitemap → `url_inventory` as `pending`)
-- `GET /api/inventory/stats`, `GET /api/inventory/render-stats`
-- `POST /api/fetch/start` (resumable processing of `pending` URLs)
-- `GET /api/fetch/status`
+- `pnpm lint`
+- `pnpm --filter @cu-tool/api build`
+- `pnpm proof:export`
+- `pnpm proof:run`
 
-## Fetch/rendering rules (see `api/src/fetch-job.ts`, `api/src/rendering.ts`)
+(If the task is docs-only, do not run build/proof unless requested.)
 
-- Default: HTTP fetch + DOM heuristics.
-- Fallback to Playwright when HTML appears to be a JS shell.
-- Persist `final_url` after redirects, extract `<link rel="canonical">`, compute `content_hash`.
-- Mark duplicates as `status='skipped'` with `duplicate_of_id` + `error_message`.
+## Component detection conventions (critical)
 
-## Component taxonomy (future phase)
-
-When parsing components, map blocks to **exactly one** of the 10 types in `POC_component_taxonomy_v_0.md`.
-
-## Important
-
-- **Do not propose manual `ALTER TABLE` commands** as a fix. Schema changes must be idempotent in code (detect columns/indexes and migrate once).
+- Do not assume semantic HTML (e.g., `<main>`, `<article>`) is reliable.
+- Always exclude global chrome where relevant:
+  - header/nav/meganav/footer/contentinfo/cookie/consent
+  - modals/popups (`[role="dialog"]`, `[aria-modal="true"]`) are excluded by design in v1.
+- Distinguish:
+  - **Eligible URLs** vs **URLs with detections**
+  - `david_component_usage` contains only detected rows.
 
 ## Output protocol (authoritative artifact)
 
-```
-- **All AI agents MUST write their results to `.github/response.md`.**
-- Treat `response.md` as the **single source of truth**; chat output is non-authoritative.
-- Every task must append/update `response.md` with this structure:
-  - **What was changed**
-  - **Why** (concise rationale)
-  - **Evidence** (numbers, SQL queries, URLs, samples)
-  - **Risks / open questions**
-  - **Next recommended step**
-- If information is not written to `response.md`, consider the task **incomplete**.
-- When preparing prompts for other agents (Claude/Copilot), **include this requirement explicitly**.
-```
+**All AI agents MUST update `.github/response.md`** for tasks that change behavior or documentation.
+
+### Required `response.md` format (lean, no roadmap)
+
+For each task entry, include ONLY:
+
+- **What changed** (bullet list, file paths)
+- **Why** (1 short paragraph, objective rationale)
+- **Evidence / Validation** (commands run + key outputs; keep it factual)
+- **Notes** (optional; only if it clarifies expected behavior or constraints)
+
+### Explicitly forbidden in `response.md` unless the user requests it
+
+- “Risks / open questions”
+- “Next recommended step”
+- Roadmaps, future work suggestions, or speculative recommendations
+- Debug diaries (step-by-step trial-and-error narratives)
+
+If you add any forbidden content, the task will be considered incomplete until it is removed.
+
+## Collaboration mode
+
+- ChatGPT provides analysis and prompts.
+- Claude/Copilot Agent performs code edits.
+- If a requested change is ambiguous, ask a single clarifying question (do not proceed with assumptions).
+
+## API endpoints (reference only)
+
+- `GET /health`
+- Inventory build/stats endpoints (see `api/src/index.ts`)
+- Analysis endpoints (see `api/src/index.ts`; do not invent routes)
+
+Important: Do not suggest manual `ALTER TABLE` commands. Schema changes must be implemented idempotently in code.
+
+## Definition of done (for hardening tasks)
+
+A detector hardening task is “done” only when:
+
+- Changes are minimal and scoped
+- Validation gates pass (lint/build/proof when applicable)
+- `docs/tracker.md` reflects the correct state (only if requested by the user)
+- `.github/response.md` is updated using the lean format above
