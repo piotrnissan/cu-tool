@@ -47,8 +47,8 @@
 - ✅ **TH-21**: Implement info_specs detector (3–6 spec items, value+label pairs) (Size: M, Risk: Medium) — Done 2026-01-22
 - ✅ **TH-22**: Implement next_action_panel detector (full-width section; supports both icon tiles and large button rows) (Size: M, Risk: Medium) — Done 2026-01-22
 - ✅ **TH-23**: Implement anchor_nav detector (in-page navigation, content flow only) (Size: M, Risk: Low) — Done 2026-01-22
-- [ ] **TH-24**: Run hardened detectors on 5 proof pages (all 11 types) (Size: M, Risk: Medium)
-- [ ] **TH-25**: Re-export detections.json with hardened detectors (Size: S, Risk: Low)
+- ✅ **TH-24**: Make david-components analysis deterministic for proof pack by supporting `url_ids` and scoped reset (Size: M, Risk: Medium) — Done 2026-01-22
+- [ ] **TH-25**: Re-run hardened detectors on proof pack + verify outputs (Size: S, Risk: Low)
 
 ### Phase 5: Human QA UI
 

@@ -491,7 +491,14 @@ async function analyzeEligibleUrlsBatch(params: {
 app.post(
   "/api/analysis/david-components/run",
   async (req: Request, res: Response) => {
-    const { market = "UK", limit = 200, offset = 0, reset = false } = req.body;
+    const {
+      market = "UK",
+      limit = 200,
+      offset = 0,
+      reset = false,
+      url_ids,
+      urls,
+    } = req.body;
 
     if (activeAnalysisJob?.running) {
       return res.status(409).json({ error: "Analysis job already running" });
@@ -503,7 +510,7 @@ app.post(
     res.json({
       success: true,
       message: "Analysis job started",
-      config: { market, limit, offset, reset },
+      config: { market, limit, offset, reset, url_ids, urls },
     });
 
     // Run analysis asynchronously
@@ -511,16 +518,43 @@ app.post(
       try {
         console.log(`\nStarting David component analysis for ${market}...`);
 
+        // Resolve urls to url_ids if provided
+        let targetUrlIds: number[] | undefined = url_ids;
+        if (!targetUrlIds && urls && Array.isArray(urls) && urls.length > 0) {
+          const placeholders = urls.map(() => "?").join(",");
+          const resolved = db
+            .prepare(
+              `SELECT id FROM url_inventory WHERE market = ? AND url IN (${placeholders})`,
+            )
+            .all(market, ...urls) as Array<{ id: number }>;
+          targetUrlIds = resolved.map((r) => r.id);
+          console.log(
+            `Resolved ${urls.length} URLs to ${targetUrlIds.length} url_ids`,
+          );
+        }
+
         // Reset if requested
         if (reset) {
           console.log("Resetting existing analysis data...");
-          const urlIds = db
-            .prepare(
-              `SELECT id FROM url_inventory WHERE market = ? AND status = 'fetched' AND duplicate_of_id IS NULL`,
-            )
-            .all(market) as Array<{ id: number }>;
+          let urlIdList: number[];
 
-          const urlIdList = urlIds.map((r) => r.id);
+          if (targetUrlIds && targetUrlIds.length > 0) {
+            // Scoped reset: delete only for specified url_ids
+            urlIdList = targetUrlIds;
+            console.log(
+              `Scoped reset for ${urlIdList.length} specific url_ids`,
+            );
+          } else {
+            // Market-wide reset
+            const urlIds = db
+              .prepare(
+                `SELECT id FROM url_inventory WHERE market = ? AND status = 'fetched' AND duplicate_of_id IS NULL`,
+              )
+              .all(market) as Array<{ id: number }>;
+            urlIdList = urlIds.map((r) => r.id);
+            console.log(`Market-wide reset for ${urlIdList.length} URLs`);
+          }
+
           if (urlIdList.length > 0) {
             const placeholders = urlIdList.map(() => "?").join(",");
             db.prepare(
@@ -533,25 +567,56 @@ app.post(
         }
 
         // Get eligible URLs
-        const eligibleUrls = db
-          .prepare(
-            `
-          SELECT id, url, html_path
-          FROM url_inventory
-          WHERE market = ?
-            AND status = 'fetched'
-            AND duplicate_of_id IS NULL
-            AND html_path IS NOT NULL
-            AND html_path NOT LIKE '\\_\\_%' ESCAPE '\\'
-          ORDER BY id
-          LIMIT ? OFFSET ?
-        `,
-          )
-          .all(market, limit, offset) as Array<{
+        let eligibleUrls: Array<{
           id: number;
           url: string;
           html_path: string;
         }>;
+
+        if (targetUrlIds && targetUrlIds.length > 0) {
+          // Use specified url_ids
+          const placeholders = targetUrlIds.map(() => "?").join(",");
+          eligibleUrls = db
+            .prepare(
+              `
+            SELECT id, url, html_path
+            FROM url_inventory
+            WHERE id IN (${placeholders})
+              AND market = ?
+              AND status = 'fetched'
+              AND duplicate_of_id IS NULL
+              AND html_path IS NOT NULL
+              AND html_path NOT LIKE '\\_\\_%' ESCAPE '\\'
+            ORDER BY id
+          `,
+            )
+            .all(...targetUrlIds, market) as Array<{
+            id: number;
+            url: string;
+            html_path: string;
+          }>;
+        } else {
+          // Use limit/offset selection
+          eligibleUrls = db
+            .prepare(
+              `
+            SELECT id, url, html_path
+            FROM url_inventory
+            WHERE market = ?
+              AND status = 'fetched'
+              AND duplicate_of_id IS NULL
+              AND html_path IS NOT NULL
+              AND html_path NOT LIKE '\\_\\_%' ESCAPE '\\'
+            ORDER BY id
+            LIMIT ? OFFSET ?
+          `,
+            )
+            .all(market, limit, offset) as Array<{
+            id: number;
+            url: string;
+            html_path: string;
+          }>;
+        }
 
         console.log(`Found ${eligibleUrls.length} eligible URLs to analyze`);
         activeAnalysisJob!.total = eligibleUrls.length;

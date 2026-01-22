@@ -735,3 +735,23 @@ pnpm proof:run
 **Note:**
 
 No `anchor_nav` detections in current proof pack. This is expected if proof pack URLs do not contain in-page anchor navigation blocks (e.g., UK VLP pages may not have anchor nav sections), or if HTML cache predates the detector. Detection accuracy will be validated during human QA phase (TH-26 to TH-32).
+
+## TH-24: Deterministic david-components analysis for proof pack (2026-01-22)
+
+### What changed
+
+- `api/src/index.ts` — `POST /api/analysis/david-components/run` now supports `url_ids` (and optional `urls`) and performs **scoped reset** when `reset:true` + `url_ids` are provided.
+
+### Why
+
+Proof pack URLs were not being analyzed because the endpoint previously selected the first N URL ids by `LIMIT`, so proof pack ids (e.g. 21, 38, 64, 202, 674) had 0 rows in `david_component_usage`. Deterministic selection via `url_ids` fixes TH-24 workflow.
+
+### Evidence / Validation
+
+- API run (scoped):
+  - `curl -X POST ... -d '{"market":"UK","reset":true,"url_ids":[21,38,64,202,674]}'`
+- DB verification:
+  - `COUNT(d.id) > 0` for ids 21/38/64/202/674 after run
+- Proof workflow:
+  - `pnpm proof:export` shows proof URLs with detections
+  - `pnpm proof:run` processes URLs with detections successfully
