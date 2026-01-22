@@ -554,4 +554,33 @@ No hero/promo detections in current 6-URL proof pack (VLPs and editorial pages d
 
 **Next:**
 
-Hero/promo detections will appear when homepage/landing pages with hero blocks are analyzed. Classification follows strict position rule: first hero-like block without preceding non-sticky content = hero; all others = promo_section.
+## Hero/promo detections will appear when homepage/landing pages with hero blocks are analyzed. Classification follows strict position rule: first hero-like block without preceding non-sticky content = hero; all others = promo_section.
+
+## 2026-01-22: TH-20 — Harden Tabs Detector (ARIA-Only)
+
+**What changed:**
+
+Single file modified: [api/src/david-components.ts](../api/src/david-components.ts)
+
+- `detectTabs()` function (lines 102-161) — Removed content-based fallback logic
+  - **Before**: Accepted panels with `role="tabpanel"` OR ≥50 chars content
+  - **After**: Requires strict ARIA `role="tabpanel"` (no fallback)
+  - Updated evidence string from `"(in content)"` to `"(ARIA-only)"`
+  - Updated JSDoc comment to clarify ARIA-only + global chrome exclusion
+
+**Why:**
+
+The tabs detector previously accepted tab panels without proper ARIA roles if they contained ≥50 characters of text. This violated the ARIA-only principle and risked false positives from non-semantic markup. TH-20 hardens the detector to require explicit `role="tabpanel"` for all valid tab panels, ensuring deterministic detection aligned with accessibility standards.
+
+**Validation:**
+
+- ✅ `pnpm --filter @cu-tool/api build` — Success (TypeScript compilation clean)
+- ✅ `pnpm lint` — No warnings or errors
+- ✅ `pnpm proof:export` — 6 URLs loaded, 5 with detections, 8 total detection rows
+- ✅ `pnpm proof:run` — All 5 pages processed successfully (no tabs detections in current proof pack)
+
+**Expected behavior:**
+
+- Tabs counts may **decrease** (stricter ARIA requirement)
+- Only tabs with proper `role="tablist"`, `role="tab"`, and `role="tabpanel"` will be detected
+- Content-based heuristics removed entirely

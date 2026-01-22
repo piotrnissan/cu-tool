@@ -99,8 +99,8 @@ function isAEMLayoutWrapper(element: Element): boolean {
 }
 
 /**
- * Detects tabs component (role="tablist" + role="tab" patterns)
- * Filters out global navigation tabs and requires valid tab panels in content
+ * Detects tabs component (ARIA-only: role="tablist" + role="tab" + role="tabpanel")
+ * Strictly excludes global chrome (header/nav/footer/meganav/modals)
  */
 function detectTabs(dom: JSDOM): ComponentDetection | null {
   const doc = dom.window.document;
@@ -112,13 +112,13 @@ function detectTabs(dom: JSDOM): ComponentDetection | null {
   const validTablists: Array<{ tabs: number; panels: number }> = [];
 
   tablists.forEach((tablist) => {
-    // Exclude global chrome
+    // Exclude global chrome (header/nav/footer/meganav/modals)
     if (isInGlobalChrome(tablist)) return;
 
     // Require inside content root
     if (!contentRoot.contains(tablist)) return;
 
-    // Require real tab panels
+    // Require tabs with role="tab"
     const tabs = tablist.querySelectorAll('[role="tab"]');
     if (tabs.length === 0) return;
 
@@ -131,11 +131,10 @@ function detectTabs(dom: JSDOM): ComponentDetection | null {
       const panel = doc.getElementById(ariaControls);
       if (!panel) return;
 
-      // Check if panel is valid (has role=tabpanel OR meaningful content)
+      // ARIA-only: require role="tabpanel" (no content-based fallback)
       const hasTabpanelRole = panel.getAttribute("role") === "tabpanel";
-      const hasContent = (panel.textContent?.trim().length || 0) >= 50;
 
-      if (hasTabpanelRole || hasContent) {
+      if (hasTabpanelRole) {
         validPanelsCount++;
       }
     });
@@ -150,7 +149,7 @@ function detectTabs(dom: JSDOM): ComponentDetection | null {
 
   // Calculate evidence
   const firstTablist = validTablists[0];
-  const evidence = `tabs: ${firstTablist.tabs} tabs, ${firstTablist.panels} panels (in content)`;
+  const evidence = `tabs: ${firstTablist.tabs} tabs, ${firstTablist.panels} panels (ARIA-only)`;
 
   return {
     componentKey: "tabs",
