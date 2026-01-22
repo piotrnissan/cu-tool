@@ -37,6 +37,95 @@ Analysis is frozen until visual proof QA validates detectors and quality gates p
 
 **Verification**: Zero hero_cta references remain in /docs except one clearly marked historical changelog entry.
 
+---
+
+## TH-17: Carousel Split Logic Implementation (2026-01-22)
+
+### What was changed
+
+Single file modified: [api/src/david-components.ts](../api/src/david-components.ts)
+
+**Added:**
+
+- New helper function `classifyCarouselContainer(container: Element): "image" | "card" | null` (lines 346-470)
+  - Implements hybrid heuristic to classify carousel containers
+  - Ensures mutual exclusivity: a container is classified as either `image_carousel` OR `card_carousel`, never both
+
+**Modified:**
+
+- `detectImageCarousel()`: Added classifier check (line 540-542)
+  - Only counts containers where `classifyCarouselContainer() === "image"`
+  - Evidence string updated to include `type=image` marker (line 565)
+- `detectCardCarousel()`: Added classifier check (line 678-680)
+  - Only counts containers where `classifyCarouselContainer() === "card"`
+  - Evidence string updated to include `type=card` marker (line 767)
+
+**Preserved:**
+
+- TH-16 nested carousel suppression: `isWithinMediaTextSplit()` guard remains active in both detectors
+- All existing deduplication and validation logic unchanged
+
+### Why (Rationale)
+
+**Problem:** Image and card carousels were being double-counted. A single DOM carousel container could match heuristics for both detector functions, leading to inflated instance counts.
+
+**Solution:** Introduce a classification layer that examines carousel item content and assigns exactly one type per container before either detector counts it.
+
+### Classification Heuristic
+
+The `classifyCarouselContainer()` function analyzes carousel items and computes:
+
+**Card signals** (per item, any of):
+
+1. Contains heading element (`<h2>`, `<h3>`, `<h4>`, `<h5>`, `<h6>`, or `role="heading"`)
+2. Contains CTA-like link/button (`<a href>` or `<button>`) with non-trivial text (>5 chars)
+3. Contains substantial text content (>40 chars after trimming)
+
+**Image signals** (per item):
+
+- Contains image element (`<img>`, `<picture>`, `[data-src]`, `[data-lazy]`)
+- OR has inline `background-image` style
+- AND lacks card signals
+
+**Classification logic:**
+
+- If ≥60% of items have card signals → classify as `"card"`
+- Otherwise → classify as `"image"`
+- Returns `null` if container doesn't qualify as a carousel (no controls, <2 items)
+
+**Threshold rationale (60%):** Conservative enough to avoid misclassification when a few items lack card structure, but permissive enough to handle mixed-content carousels where the majority are clearly cards.
+
+### Evidence
+
+**Build validation:**
+
+```bash
+pnpm --filter @cu-tool/api build
+# Result: TypeScript compilation successful, no errors
+```
+
+**Proof suite validation:**
+
+```bash
+pnpm proof:run
+# Result: All 5 pages processed successfully
+# - Juke: 4 image_carousel, 1 card_carousel
+# - Ariya: 2 image_carousel, 1 card_carousel
+# - Qashqai: 3 image_carousel, 1 card_carousel
+# - Electric vehicles: 2 cards_section
+# - Homepage: 1 cards_section
+# No double-counting detected in proof runs
+```
+
+**Code verification:**
+
+- Classifier applied at lines 540-542 (image carousel detector)
+- Classifier applied at lines 678-680 (card carousel detector)
+- Evidence strings now include `type=image` or `type=card` markers
+- Both detectors retain existing `isWithinMediaTextSplit()` guard (TH-16)
+
+---
+
 ### Decision Lock Confirmation (2026-01-20)
 
 **10+ files updated** to convert open questions to confirmed architectural decisions:

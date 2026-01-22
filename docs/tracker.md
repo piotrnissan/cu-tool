@@ -39,8 +39,8 @@
 - ✅ **TH-14**: Harden cards_section detector — exclude support/owners teasers; cards_section = product/offers only (intent filter) (Size: M, Risk: Medium) — Done 2026-01-21
 - ✅ **TH-14.1**: Verify global chrome + modal exclusions across all detectors (audit-only; no code changes required) — Verified 2026-01-21
 - ✅ **TH-15**: Implement hero vs promo rule (top-of-page hero only) (Size: M, Risk: Medium)
-- [ ] **TH-16**: Implement media_text_split with media_type variants (image|video|carousel) + nested carousel no-double-count (Size: L, Risk: High)
-- [ ] **TH-17**: Implement carousel split logic (image_carousel vs card_carousel) (Size: M, Risk: High)
+- ✅ **TH-16**: Implement media_text_split with media_type variants (image|video|carousel) + nested carousel no-double-count (Size: L, Risk: High)
+- ✅ **TH-17**: Implement carousel split logic (image_carousel vs card_carousel) (Size: M, Risk: High) — Done 2026-01-22
 - [ ] **TH-18**: Harden cards_section detector (≥3 cards, exclude footer, ignore AEM grids, add card_type classification) (Size: L, Risk: High)
 - [ ] **TH-19**: Fix accordion footer inflation (exclude [role="contentinfo"]) (Size: M, Risk: Medium)
 - [ ] **TH-20**: Harden tabs detector (verify ARIA role filtering, exclude mega-nav) (Size: S, Risk: Low)
@@ -94,6 +94,7 @@
 
 **Total tasks**: 42 (+ 3 quality gate classes)
 **Sprints**: 3
+**Next step**: TH-18 (harden cards_section detector)
 
 - Sprint 1: TH-01 to TH-13 (13 tasks, S/M risk, 2-3 days)
 - Sprint 2: TH-14 to TH-32 (19 tasks, M/L risk, 4-5 days)

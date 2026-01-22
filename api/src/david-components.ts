@@ -344,6 +344,111 @@ function getDOMDepth(element: Element): number {
 }
 
 /**
+ * Classify a carousel container as "image" or "card" based on hybrid heuristics.
+ * Returns null if the container doesn't qualify as a carousel.
+ * Ensures mutual exclusivity: a container is either image_carousel OR card_carousel.
+ */
+function classifyCarouselContainer(
+  container: Element,
+): "image" | "card" | null {
+  // Basic carousel validation: require controls OR scrollable
+  const hasControls = hasCarouselControls(container);
+  const isScrollable = isScrollableCarousel(container);
+  if (!hasControls && !isScrollable) return null;
+
+  // Identify slide/item elements using same logic as existing detectors
+  const itemSelectors = [
+    '[class*="card"]',
+    '[class*="item"]',
+    '[class*="slide"]',
+    '[class*="tile"]',
+  ];
+
+  // Collect potential items (prefer direct children, fallback to selector-based)
+  let items = Array.from(container.children).filter((child) => {
+    // Skip wrapper divs that only contain one child
+    if (child.children.length === 1) return false;
+    // Must have some content
+    const text = child.textContent?.trim() || "";
+    const hasContent =
+      text.length > 10 || child.querySelector("img, picture, a[href]");
+    return hasContent;
+  });
+
+  // Fallback: use selector-based item discovery
+  if (items.length < 2) {
+    const selectorItems: Element[] = [];
+    itemSelectors.forEach((selector) => {
+      const found = Array.from(container.querySelectorAll(selector));
+      found.forEach((item) => {
+        // Check if reasonably direct descendant (not too nested)
+        let parent = item.parentElement;
+        let depth = 0;
+        while (parent && parent !== container && depth < 5) {
+          parent = parent.parentElement;
+          depth++;
+        }
+        if (parent === container && !selectorItems.includes(item)) {
+          selectorItems.push(item);
+        }
+      });
+    });
+    if (selectorItems.length > items.length) {
+      items = selectorItems;
+    }
+  }
+
+  // Need at least 2 items to classify
+  if (items.length < 2) return null;
+
+  // Count card signals per item
+  let cardSignalCount = 0;
+
+  items.forEach((item) => {
+    let hasCardSignal = false;
+
+    // Card signals:
+    // 1. Contains heading
+    const hasHeading =
+      item.querySelector("h2, h3, h4, h5, h6, [role='heading']") !== null;
+    if (hasHeading) hasCardSignal = true;
+
+    // 2. Contains CTA-like link/button with non-trivial text
+    if (!hasCardSignal) {
+      const links = item.querySelectorAll("a[href], button");
+      for (const link of Array.from(links)) {
+        const linkText = link.textContent?.trim() || "";
+        if (linkText.length > 5) {
+          hasCardSignal = true;
+          break;
+        }
+      }
+    }
+
+    // 3. Contains substantial text (>40 chars)
+    if (!hasCardSignal) {
+      const text = item.textContent?.trim() || "";
+      if (text.length > 40) {
+        hasCardSignal = true;
+      }
+    }
+
+    // Count signals
+    if (hasCardSignal) {
+      cardSignalCount++;
+    }
+  });
+
+  // Classify: if 60%+ items have card signals => "card", else => "image"
+  const cardThreshold = items.length * 0.6;
+  if (cardSignalCount >= cardThreshold) {
+    return "card";
+  } else {
+    return "image";
+  }
+}
+
+/**
  * Detects image carousel (slider-like containers with navigation controls)
  * Hardened with robust nested deduplication
  */
@@ -421,6 +526,10 @@ function detectImageCarousel(dom: JSDOM): ComponentDetection | null {
     // Skip if nested within media_text_split (no double-count)
     if (isWithinMediaTextSplit(container)) return;
 
+    // TH-17: Apply classifier to ensure mutual exclusivity
+    const carouselType = classifyCarouselContainer(container);
+    if (carouselType !== "image") return;
+
     // Require >=2 images
     const images = container.querySelectorAll("img, picture img");
     if (images.length < 2) return;
@@ -442,7 +551,7 @@ function detectImageCarousel(dom: JSDOM): ComponentDetection | null {
   if (imageCarousels.length === 0) return null;
 
   const itemCounts = imageCarousels.map((c) => c.imageCount);
-  const evidence = `image_carousel: ${imageCarousels.length} (deduped), items=[${itemCounts.join(",")}], controls=yes`;
+  const evidence = `image_carousel: ${imageCarousels.length} (deduped), items=[${itemCounts.join(",")}], controls=yes, type=image`;
 
   return {
     componentKey: "image_carousel",
@@ -554,6 +663,11 @@ function detectCardCarousel(dom: JSDOM): ComponentDetection | null {
   deduped.forEach((container) => {
     // Skip if nested within media_text_split (no double-count)
     if (isWithinMediaTextSplit(container)) return;
+
+    // TH-17: Apply classifier to ensure mutual exclusivity
+    const carouselType = classifyCarouselContainer(container);
+    if (carouselType !== "card") return;
+
     // Loosened card-like item validation:
     // Look for card-like items (direct children OR deeper descendants)
     // - Each item must have: link (a[href]) AND (heading h2-h6 OR media)
@@ -642,7 +756,7 @@ function detectCardCarousel(dom: JSDOM): ComponentDetection | null {
     .map((c) => (c.hasControls ? "controls" : "scrollable"))
     .join(",");
 
-  const evidence = `card_carousel: ${cardCarousels.length} (deduped), items=[${itemCounts.join(",")}], ${controlTypes}`;
+  const evidence = `card_carousel: ${cardCarousels.length} (deduped), items=[${itemCounts.join(",")}], ${controlTypes}, type=card`;
 
   return {
     componentKey: "card_carousel",
