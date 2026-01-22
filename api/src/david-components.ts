@@ -1263,6 +1263,121 @@ function detectHeroAndPromo(dom: JSDOM): ComponentDetection[] {
 }
 
 /**
+ * Detects info_specs blocks (metric tiles only)
+ * Nissan-style metric tiles: 3-12 tiles with metric values + labels
+ */
+function detectInfoSpecs(dom: JSDOM): ComponentDetection | null {
+  const doc = dom.window.document;
+  const contentRoot = getContentRoot(doc);
+
+  const infoSpecsBlocks: Array<{ container: Element; tiles: Element[] }> = [];
+
+  // Find potential containers (sections, divs, articles, lists)
+  contentRoot
+    .querySelectorAll("section, div, article, ul, ol")
+    .forEach((container) => {
+      // Exclude global chrome
+      if (isInGlobalChrome(container)) return;
+
+      // Exclude footer explicitly
+      if (container.closest('footer, [role="contentinfo"]')) return;
+
+      // Exclude AEM layout wrappers
+      if (isAEMLayoutWrapper(container)) return;
+
+      // Get direct children (potential tiles)
+      const children = Array.from(container.children).filter(
+        (child) => !isAEMLayoutWrapper(child as Element),
+      );
+
+      // Must have 3-12 tiles
+      if (children.length < 3 || children.length > 12) return;
+
+      // Check if children qualify as metric tiles
+      const metricTiles = children.filter((child) => {
+        const element = child as Element;
+
+        // Get all text content from element
+        const textContent = element.textContent?.trim() || "";
+        if (textContent.length === 0) return false;
+
+        // Check for primary links/CTAs - exclude if present
+        const primaryLinks = element.querySelectorAll("a[href], button");
+        if (primaryLinks.length > 0) {
+          // Allow if link is minimal (just wrapping, not prominent CTA)
+          const linkText = Array.from(primaryLinks)
+            .map((link) => link.textContent?.trim().length || 0)
+            .reduce((sum, len) => sum + len, 0);
+          const totalText = textContent.length;
+          // If links are >50% of content, it's a CTA tile, not info_specs
+          if (linkText > totalText * 0.5) return false;
+        }
+
+        // Look for metric-like value (digits or alphanumeric metric tokens)
+        const hasMetricValue =
+          /\d/.test(textContent) || // Contains digits
+          /\b(2WD|4WD|AWD|FWD|RWD)\b/i.test(textContent) || // Drive types
+          /\b\d+\s*(seats?)\b/i.test(textContent); // Seats pattern
+
+        if (!hasMetricValue) return false;
+
+        // Optional: boost confidence with unit signals (not required)
+        const hasUnitSignal =
+          /(miles?|mins?|minutes?|km|kW|kg|liters?|litres?|m3|Nm|g\/km|mpg|%|seats?|WD)\b/i.test(
+            textContent,
+          );
+
+        // Look for label/description (text that's not just the value)
+        // Split by newlines/breaks to find separate text segments
+        const textSegments = textContent
+          .split(/\n|<br>/)
+          .map((s) => s.trim())
+          .filter((s) => s.length > 0);
+
+        // Metric tile should have at least 2 text segments (value + label)
+        // OR have a unit signal with descriptive text
+        const hasLabel = textSegments.length >= 2 || hasUnitSignal;
+
+        // Avoid long paragraphs - metric tiles are concise
+        const isNotLongParagraph = textContent.length < 200;
+
+        return hasMetricValue && hasLabel && isNotLongParagraph;
+      });
+
+      // Must have at least 3 metric tiles
+      if (metricTiles.length >= 3) {
+        infoSpecsBlocks.push({
+          container,
+          tiles: metricTiles as Element[],
+        });
+      }
+    });
+
+  if (infoSpecsBlocks.length === 0) return null;
+
+  // Generate evidence with sample values
+  const firstBlock = infoSpecsBlocks[0];
+  const sampleTiles = firstBlock.tiles.slice(0, 3);
+  const sampleValues = sampleTiles
+    .map((tile) => {
+      const text = tile.textContent?.trim() || "";
+      // Extract first line or first 30 chars
+      const firstLine = text.split(/\n/)[0].trim();
+      return firstLine.slice(0, 30);
+    })
+    .join("; ");
+
+  const evidence = `info_specs: ${firstBlock.tiles.length} tiles, sample=[${sampleValues}]`;
+
+  return {
+    componentKey: "info_specs",
+    instanceCount: infoSpecsBlocks.length,
+    confidence: "medium",
+    evidence,
+  };
+}
+
+/**
  * Main analysis function: runs all detectors
  */
 export function analyzeComponents(html: string): ComponentDetection[] {
@@ -1278,6 +1393,7 @@ export function analyzeComponents(html: string): ComponentDetection[] {
     detectCardsSection, // Renamed from detectCardsGrid
     detectIconGrid,
     detectMediaTextSplit,
+    detectInfoSpecs,
   ];
 
   detectors.forEach((detector) => {

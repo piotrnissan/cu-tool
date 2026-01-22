@@ -44,7 +44,7 @@
 - ✅ **TH-18**: Harden cards_section detector (≥3 cards, exclude footer, ignore AEM grids, add card_type classification) (Size: L, Risk: High) — Done 2026-01-22
 - ✅ **TH-19**: Fix accordion footer inflation (exclude [role="contentinfo"]) (Size: M, Risk: Medium) — Done 2026-01-22
 - ✅ **TH-20**: Harden tabs detector (verify ARIA role filtering, exclude mega-nav) (Size: S, Risk: Low) — Done 2026-01-22
-- [ ] **TH-21**: Implement info_specs detector (3–6 spec items, value+label pairs) (Size: M, Risk: Medium)
+- ✅ **TH-21**: Implement info_specs detector (3–6 spec items, value+label pairs) (Size: M, Risk: Medium) — Done 2026-01-22
 - [ ] **TH-22**: Implement next_action_panel detector (3–6 actions, icon+label+link) (Size: M, Risk: Medium)
 - [ ] **TH-23**: Implement anchor_nav detector (in-page navigation, content flow only) (Size: M, Risk: Low)
 - [ ] **TH-24**: Run hardened detectors on 5 proof pages (all 11 types) (Size: M, Risk: Medium)
@@ -94,14 +94,12 @@
 
 **Total tasks**: 42 (+ 3 quality gate classes)
 **Sprints**: 3
-**Next step**: TH-21 (Implement info_specs detector)
+**Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 in progress (TH-14 to TH-21 complete)
+**Next step**: TH-22 (Implement next_action_panel detector)
 
 - Sprint 1: TH-01 to TH-13 (13 tasks, S/M risk, 2-3 days)
 - Sprint 2: TH-14 to TH-32 (19 tasks, M/L risk, 4-5 days)
 - Sprint 3: TH-33 to TH-42 (10 tasks, M risk, 2-3 days)
-
-**Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 in progress (TH-14 to TH-20 complete)
-**Next step**: TH-21 (Implement info_specs detector)
 
 ---
 

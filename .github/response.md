@@ -584,3 +584,41 @@ The tabs detector previously accepted tab panels without proper ARIA roles if th
 - Tabs counts may **decrease** (stricter ARIA requirement)
 - Only tabs with proper `role="tablist"`, `role="tab"`, and `role="tabpanel"` will be detected
 - Content-based heuristics removed entirely
+
+---
+
+## 2026-01-22: TH-21 — Implement `info_specs` Detector (Metric Tiles Only)
+
+**What changed:**
+
+Single file modified: [api/src/david-components.ts](../api/src/david-components.ts)
+
+- Added `detectInfoSpecs()` function (104 lines, inserted before `analyzeComponents()`)
+- Registered detector in `analyzeComponents()` detector array
+
+**Detection logic:**
+
+- Container scope: Must contain 3-12 sibling tiles (hard limits)
+- Exclusions: Respects `isInGlobalChrome()`, explicitly excludes footer/contentinfo, ignores AEM wrappers
+- Tile qualification:
+  - Must have metric-like value (digits OR alphanumeric tokens like 2WD/4WD/5 seats)
+  - Must have label/description (≥2 text segments OR unit signal present)
+  - Must NOT be long paragraphs (textContent <200 chars)
+  - Excludes tiles with primary links/CTAs (>50% of text content)
+- Optional unit signals (boost confidence): miles, mins, km, kW, kg, liters, m3, Nm, g/km, mpg, %, seats, WD
+- Evidence format: `info_specs: N tiles, sample=[first 30 chars of first 3 tiles]`
+
+**Why:**
+
+Nissan editorial/VLP pages use metric tile blocks to present vehicle specifications (e.g., "257 miles driving range", "15 mins charging time", "326 liters luggage capacity"). These blocks are distinct from tables/definition-lists and require pattern-based detection. Detector uses conservative heuristics (3-12 tiles, metric value + label structure, CTA exclusion) to minimize false positives.
+
+**Validation:**
+
+- ✅ `pnpm --filter @cu-tool/api build` — Success (TypeScript compilation clean)
+- ✅ `pnpm lint` — No warnings or errors (eslint + next lint passed)
+- ✅ `pnpm proof:export` — 6 URLs loaded, 5 with detections, 8 total detection rows
+- ✅ `pnpm proof:run` — All 5 pages processed successfully (no info_specs detections in current 6-URL proof pack)
+
+**Note:**
+
+No info_specs detections in current proof pack (VLP/editorial pages in pack may not contain metric tile blocks, or HTML cache predates this detector). Detection accuracy will be validated during human QA phase (TH-26 to TH-32).
