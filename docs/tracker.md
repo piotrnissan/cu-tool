@@ -48,7 +48,7 @@
 - ✅ **TH-22**: Implement next_action_panel detector (full-width section; supports both icon tiles and large button rows) (Size: M, Risk: Medium) — Done 2026-01-22
 - ✅ **TH-23**: Implement anchor_nav detector (in-page navigation, content flow only) (Size: M, Risk: Low) — Done 2026-01-22
 - ✅ **TH-24**: Make david-components analysis deterministic for proof pack by supporting `url_ids` and scoped reset (Size: M, Risk: Medium) — Done 2026-01-22
-- [ ] **TH-25**: Re-run hardened detectors on proof pack + verify outputs (Size: S, Risk: Low)
+- ✅ **TH-25**: Re-run hardened detectors on proof pack + verify outputs (Size: S, Risk: Low)
 
 ### Phase 5: Human QA UI
 
@@ -94,8 +94,8 @@
 
 **Total tasks**: 42 (+ 3 quality gate classes)
 **Sprints**: 3
-**Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 in progress (TH-14 to TH-23 complete)
-**Next step**: TH-24 (Run hardened detectors on 5 proof pages)
+**Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 complete (TH-14 to TH-25)
+**Next step**: TH-26 (Start Human QA UI)
 
 - Sprint 1: TH-01 to TH-13 (13 tasks, S/M risk, 2-3 days)
 - Sprint 2: TH-14 to TH-32 (19 tasks, M/L risk, 4-5 days)

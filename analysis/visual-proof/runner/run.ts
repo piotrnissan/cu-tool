@@ -105,7 +105,8 @@ const COMPONENT_COLORS: Record<string, string> = {
 const COMPONENT_SELECTORS: Record<string, string> = {
   hero: '.hero, section.hero, [class*="hero-banner"]',
   promo_section: 'section[class*="promo"], [class*="banner"]',
-  media_text_split: 'section[class*="split"], [class*="media-text"]',
+  media_text_split:
+    'div.c_302A:has(.grid-column.column-8), section[class*="split"], [class*="media-text"]',
   info_specs: '[class*="specs"], [class*="key-facts"]',
   next_action_panel: '[class*="next-steps"], [class*="action-panel"]',
   image_carousel: '[class*="swiper"], [class*="carousel"], [class*="slider"]',
