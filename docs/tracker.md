@@ -45,7 +45,7 @@
 - ✅ **TH-19**: Fix accordion footer inflation (exclude [role="contentinfo"]) (Size: M, Risk: Medium) — Done 2026-01-22
 - ✅ **TH-20**: Harden tabs detector (verify ARIA role filtering, exclude mega-nav) (Size: S, Risk: Low) — Done 2026-01-22
 - ✅ **TH-21**: Implement info_specs detector (3–6 spec items, value+label pairs) (Size: M, Risk: Medium) — Done 2026-01-22
-- [ ] **TH-22**: Implement next_action_panel detector (3–6 actions, icon+label+link) (Size: M, Risk: Medium)
+- ✅ **TH-22**: Implement next_action_panel detector (full-width section; supports both icon tiles and large button rows) (Size: M, Risk: Medium) — Done 2026-01-22
 - [ ] **TH-23**: Implement anchor_nav detector (in-page navigation, content flow only) (Size: M, Risk: Low)
 - [ ] **TH-24**: Run hardened detectors on 5 proof pages (all 11 types) (Size: M, Risk: Medium)
 - [ ] **TH-25**: Re-export detections.json with hardened detectors (Size: S, Risk: Low)
@@ -94,8 +94,8 @@
 
 **Total tasks**: 42 (+ 3 quality gate classes)
 **Sprints**: 3
-**Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 in progress (TH-14 to TH-21 complete)
-**Next step**: TH-22 (Implement next_action_panel detector)
+**Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 in progress (TH-14 to TH-22 complete)
+**Next step**: TH-23 (Implement anchor_nav detector)
 
 - Sprint 1: TH-01 to TH-13 (13 tasks, S/M risk, 2-3 days)
 - Sprint 2: TH-14 to TH-32 (19 tasks, M/L risk, 4-5 days)

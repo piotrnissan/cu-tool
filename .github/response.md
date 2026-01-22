@@ -622,3 +622,46 @@ Nissan editorial/VLP pages use metric tile blocks to present vehicle specificati
 **Note:**
 
 No info_specs detections in current proof pack (VLP/editorial pages in pack may not contain metric tile blocks, or HTML cache predates this detector). Detection accuracy will be validated during human QA phase (TH-26 to TH-32).
+
+---
+
+## 2026-01-22: TH-22 — Implement `next_action_panel` Detector (Full-Width CTA Section)
+
+**What changed:**
+
+Single file modified: [api/src/david-components.ts](../api/src/david-components.ts)
+
+- Added `isFullWidthSection()` helper function (19 lines)
+- Added `detectNextActionPanel()` function (129 lines, inserted after `detectInfoSpecs()`)
+- Registered detector in `analyzeComponents()` detector array
+
+**Detection logic:**
+
+- Full-width requirement: Must be outermost section-level block (not embedded in cards/list items), ≤4 layers deep from content root
+- Exclusions: Respects `isInGlobalChrome()`, explicitly excludes footer/contentinfo, ignores AEM wrappers
+- **Variant A — Icon tiles (3-8 items):**
+  - Direct children must be primarily links (`a[href]`)
+  - Short labels (3-100 chars)
+  - Icon presence (`svg`, `img`, `[class*='icon']`) boosts confidence (not strictly required)
+  - Rejects >8 items to avoid navigation grids
+- **Variant B — Large CTA buttons (1-4 buttons):**
+  - Must have explicit button elements OR links styled as buttons (btn/button/cta class patterns)
+  - Short button text (3-40 chars)
+  - Requires ≥1 explicit `<button>` OR button-styled link
+  - Excludes containers that look like `cards_section` (avoids counting per-card CTAs)
+- Evidence format: `next_action_panel: N actions, variant=tiles|buttons`
+
+**Why:**
+
+Nissan pages use full-width CTA sections to guide users to conversion actions (e.g., "Build your Juke", "Book a test drive", "View offers"). These sections can appear as icon tiles (e.g., 3-5 action options) or as prominent button rows (1-4 large CTAs). The detector distinguishes next_action_panel from other components (cards_section, footer links, inline CTAs) by enforcing full-width positioning and CTA-focused structure.
+
+**Validation:**
+
+- ✅ `pnpm --filter @cu-tool/api build` — Success (TypeScript compilation clean)
+- ✅ `pnpm lint` — No warnings or errors (eslint + next lint passed)
+- ✅ `pnpm proof:export` — 6 URLs loaded, 5 with detections, 8 total detection rows
+- ✅ `pnpm proof:run` — All 5 pages processed successfully (no next_action_panel detections in current proof pack)
+
+**Note:**
+
+No next_action_panel detections in current proof pack. This is expected if proof pack URLs do not contain full-width CTA sections (variant A/B), or if HTML cache predates the detector. Detection accuracy will be validated during human QA phase.

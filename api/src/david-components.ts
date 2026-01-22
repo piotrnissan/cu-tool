@@ -1378,6 +1378,178 @@ function detectInfoSpecs(dom: JSDOM): ComponentDetection | null {
 }
 
 /**
+ * Helper: Check if container is full-width section (outermost, not embedded)
+ * "Full-width" means section-level block in content flow, not a small nested fragment
+ */
+function isFullWidthSection(element: Element, contentRoot: Element): boolean {
+  // Must be inside content root
+  if (!contentRoot.contains(element)) return false;
+
+  // Reject if within a card item or list item (embedded context)
+  if (element.closest('[class*="card"], li')) return false;
+
+  // Check DOM depth - full-width sections should be relatively shallow
+  // Count non-wrapper ancestors up to contentRoot
+  let depth = 0;
+  let current = element.parentElement;
+  while (current && current !== contentRoot) {
+    if (!isAEMLayoutWrapper(current)) {
+      depth++;
+    }
+    current = current.parentElement;
+  }
+
+  // Full-width sections should be at most 3-4 meaningful containers deep
+  if (depth > 4) return false;
+
+  return true;
+}
+
+/**
+ * Detects next_action_panel (full-width section with CTA actions)
+ * Two variants:
+ * A) Icon tiles (≥3 action items with icons)
+ * B) Large CTA button row (1-4 prominent buttons)
+ */
+function detectNextActionPanel(dom: JSDOM): ComponentDetection | null {
+  const doc = dom.window.document;
+  const contentRoot = getContentRoot(doc);
+
+  const nextActionPanels: Array<{
+    container: Element;
+    actionCount: number;
+    variant: "tiles" | "buttons";
+  }> = [];
+
+  // Find potential containers (section-level blocks)
+  contentRoot.querySelectorAll("section, div, article").forEach((container) => {
+    // Exclude global chrome
+    if (isInGlobalChrome(container)) return;
+
+    // Exclude footer explicitly
+    if (container.closest('footer, [role="contentinfo"]')) return;
+
+    // Exclude AEM layout wrappers
+    if (isAEMLayoutWrapper(container)) return;
+
+    // Must be full-width section (outermost, not embedded)
+    if (!isFullWidthSection(container, contentRoot)) return;
+
+    // Get direct children (potential action items)
+    const children = Array.from(container.children).filter(
+      (child) => !isAEMLayoutWrapper(child as Element),
+    );
+
+    // Variant A: Icon tiles (3-8 items)
+    if (children.length >= 3 && children.length <= 8) {
+      const iconTiles = children.filter((child) => {
+        const element = child as Element;
+
+        // Must be primarily a link
+        const primaryLink = element.querySelector("a[href]");
+        if (!primaryLink) return false;
+
+        // Short label (action tiles are concise)
+        const labelText = element.textContent?.trim() || "";
+        if (labelText.length < 3 || labelText.length > 100) return false;
+
+        // Icon presence boosts confidence (not strictly required)
+        const hasIcon =
+          element.querySelector("svg, img, [class*='icon']") !== null;
+
+        return hasIcon || labelText.length <= 50; // Short text acceptable without icon
+      });
+
+      if (iconTiles.length >= 3) {
+        nextActionPanels.push({
+          container,
+          actionCount: iconTiles.length,
+          variant: "tiles",
+        });
+        return; // Found as tiles variant, skip button check
+      }
+    }
+
+    // Variant B: Large CTA button row (1-4 buttons)
+    const buttonLikeElements = Array.from(
+      container.querySelectorAll("button, a[href]"),
+    ).filter((el) => {
+      // Must be relatively direct descendant (not too nested)
+      let parent = el.parentElement;
+      let depth = 0;
+      while (parent && parent !== container && depth < 3) {
+        parent = parent.parentElement;
+        depth++;
+      }
+      if (parent !== container) return false;
+
+      // Check if button-like (not inline text link)
+      const element = el as Element;
+      const tagName = element.tagName.toLowerCase();
+
+      // Buttons are always button-like
+      if (tagName === "button") return true;
+
+      // For <a>, check if styled as button (class patterns)
+      const className = element.className || "";
+      const isButtonStyled = /\b(btn|button|cta|primary|secondary)\b/i.test(
+        className,
+      );
+
+      // Check label length (buttons have short text)
+      const labelText = element.textContent?.trim() || "";
+      const hasShortLabel = labelText.length >= 3 && labelText.length <= 40;
+
+      return isButtonStyled && hasShortLabel;
+    });
+
+    // Count unique buttons (deduplicate if multiple in same wrapper)
+    const uniqueButtons = new Set(buttonLikeElements);
+    const buttonCount = uniqueButtons.size;
+
+    if (buttonCount >= 1 && buttonCount <= 4) {
+      // Additional check: avoid false positives from body text links
+      // Require at least one <button> element OR explicit button styling
+      const hasExplicitButton = Array.from(uniqueButtons).some((btn) => {
+        return (
+          btn.tagName.toLowerCase() === "button" ||
+          /\b(btn|button|cta)\b/i.test(btn.className || "")
+        );
+      });
+
+      if (hasExplicitButton) {
+        // Avoid counting if container looks like cards_section
+        // (next_action_panel buttons are standalone, not per-card CTAs)
+        const looksLikeCards = children.some((child) =>
+          isCardLikeItem(child as Element),
+        );
+
+        if (!looksLikeCards) {
+          nextActionPanels.push({
+            container,
+            actionCount: buttonCount,
+            variant: "buttons",
+          });
+        }
+      }
+    }
+  });
+
+  if (nextActionPanels.length === 0) return null;
+
+  // Generate evidence
+  const firstPanel = nextActionPanels[0];
+  const evidence = `next_action_panel: ${firstPanel.actionCount} actions, variant=${firstPanel.variant}`;
+
+  return {
+    componentKey: "next_action_panel",
+    instanceCount: nextActionPanels.length,
+    confidence: "medium",
+    evidence,
+  };
+}
+
+/**
  * Main analysis function: runs all detectors
  */
 export function analyzeComponents(html: string): ComponentDetection[] {
@@ -1394,6 +1566,7 @@ export function analyzeComponents(html: string): ComponentDetection[] {
     detectIconGrid,
     detectMediaTextSplit,
     detectInfoSpecs,
+    detectNextActionPanel,
   ];
 
   detectors.forEach((detector) => {
