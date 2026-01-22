@@ -170,6 +170,9 @@ function detectAccordion(dom: JSDOM): ComponentDetection | null {
   // Method 1: Native details/summary (semantic HTML)
   const detailsElements = Array.from(doc.querySelectorAll("details")).filter(
     (el) => {
+      // Exclude footer/contentinfo context
+      if (el.closest('footer, [role="contentinfo"]')) return false;
+
       return !isInGlobalChrome(el) && contentRoot.contains(el);
     },
   );
@@ -187,6 +190,9 @@ function detectAccordion(dom: JSDOM): ComponentDetection | null {
   const ariaExpanded = Array.from(
     doc.querySelectorAll("[aria-expanded]"),
   ).filter((el) => {
+    // Exclude footer/contentinfo context
+    if (el.closest('footer, [role="contentinfo"]')) return false;
+
     // Exclude global chrome (footer, header, nav, etc.)
     if (isInGlobalChrome(el)) return false;
 
@@ -771,25 +777,27 @@ function detectCardCarousel(dom: JSDOM): ComponentDetection | null {
  * Must have: link + visual media + heading
  */
 function isCardLikeItem(element: Element): boolean {
-  // Must contain a link
-  const hasLink = element.querySelector("a[href]") !== null;
-  if (!hasLink) return false;
+  // Check for non-trivial content (ignore empty/purely decorative)
+  const textContent = element.textContent?.trim() || "";
+  if (textContent.length < 5) return false; // arbitrary minimum
 
-  // Must contain visual media
-  const hasMedia =
+  // Card-like if it has: heading OR image OR CTA-like link/button
+  const hasHeading =
+    element.querySelector("h2, h3, h4, h5, h6") !== null ||
+    element.querySelector('[role="heading"]') !== null;
+
+  const hasImage =
     element.querySelector("img") !== null ||
     element.querySelector("picture") !== null ||
     element.querySelector("svg") !== null ||
     element.querySelector('[role="img"]') !== null;
-  if (!hasMedia) return false;
 
-  // Must contain heading-like element
-  const hasHeading =
-    element.querySelector("h2, h3, h4") !== null ||
-    element.querySelector('[role="heading"]') !== null;
-  if (!hasHeading) return false;
+  const hasCTA =
+    element.querySelector("a[href]") !== null ||
+    element.querySelector("button") !== null;
 
-  return true;
+  // At least one of the above must be present
+  return hasHeading || hasImage || hasCTA;
 }
 
 /**
@@ -880,11 +888,15 @@ function detectCardsSection(dom: JSDOM): ComponentDetection | null {
       if (isInGlobalChrome(container)) return;
       if (isAEMLayoutWrapper(container)) return; // Skip AEM wrappers as candidates
 
+      // Hard rule: exclude footer containers
+      if (container.closest('footer, [role="contentinfo"]')) return;
+
       // Count direct children that are card-like
       const cardLikeChildren = Array.from(container.children).filter((child) =>
         isCardLikeItem(child),
       );
 
+      // Minimum 3 cards required
       if (cardLikeChildren.length >= 3) {
         candidates.push(container);
       }

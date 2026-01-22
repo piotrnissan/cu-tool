@@ -42,7 +42,7 @@
 - ✅ **TH-16**: Implement media_text_split with media_type variants (image|video|carousel) + nested carousel no-double-count (Size: L, Risk: High)
 - ✅ **TH-17**: Implement carousel split logic (image_carousel vs card_carousel) (Size: M, Risk: High) — Done 2026-01-22
 - ✅ **TH-18**: Harden cards_section detector (≥3 cards, exclude footer, ignore AEM grids, add card_type classification) (Size: L, Risk: High) — Done 2026-01-22
-- [ ] **TH-19**: Fix accordion footer inflation (exclude [role="contentinfo"]) (Size: M, Risk: Medium)
+- ✅ **TH-19**: Fix accordion footer inflation (exclude [role="contentinfo"]) (Size: M, Risk: Medium) — Done 2026-01-22
 - [ ] **TH-20**: Harden tabs detector (verify ARIA role filtering, exclude mega-nav) (Size: S, Risk: Low)
 - [ ] **TH-21**: Implement info_specs detector (3–6 spec items, value+label pairs) (Size: M, Risk: Medium)
 - [ ] **TH-22**: Implement next_action_panel detector (3–6 actions, icon+label+link) (Size: M, Risk: Medium)
@@ -101,7 +101,7 @@
 - Sprint 3: TH-33 to TH-42 (10 tasks, M risk, 2-3 days)
 
 **Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 ready to start
-**Next step**: TH-16 (Implement media_text_split with media_type variants (image|video|carousel) + nested carousel no-double-count)
+**Next step**: TH-20 (Harden tabs detector (verify ARIA role filtering, exclude mega-nav))
 
 ---
 

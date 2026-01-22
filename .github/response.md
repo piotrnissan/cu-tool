@@ -39,6 +39,84 @@ Analysis is frozen until visual proof QA validates detectors and quality gates p
 
 ---
 
+## TH-18: Harden `cards_section` Detector (2026-01-22)
+
+### What was changed
+
+Single file modified: [api/src/david-components.ts](../api/src/david-components.ts)
+
+**Modified:**
+
+- `isCardLikeItem()` function (lines 773-795) — Relaxed from strict AND logic to OR logic:
+  - **Before**: Required link AND image AND heading (all 3 mandatory)
+  - **After**: Requires (heading OR image OR CTA) AND non-trivial content (≥5 chars)
+  - Expanded heading detection to include h5, h6
+  - Added button as CTA alternative to links
+  - Added content check to filter empty/decorative elements
+
+- `detectCardsSection()` function (line 881) — Added explicit footer exclusion:
+  - **New hard rule**: `if (container.closest('footer, [role="contentinfo"]')) return;`
+  - Enforces footer exclusion even if container otherwise looks like cards_section
+  - Comment clarified minimum 3 cards requirement
+
+### Why
+
+**Problem**: `cards_section` detector had false positives from:
+
+1. Layout grid wrappers counted as cards
+2. Footer sections inflating counts
+3. Overly strict AND logic missing valid card patterns
+4. No minimum content threshold allowing empty elements
+
+**Solution**: Applied 4 hardening rules per TH-18 spec:
+
+1. ✅ Minimum 3 cards (already enforced, preserved)
+2. ✅ Footer exclusion (new hard rule added)
+3. ✅ Layout wrapper exclusion (already using `isAEMLayoutWrapper`, preserved)
+4. ✅ Relaxed card definition to OR logic + content check
+
+### Evidence
+
+**Compilation**: ✅ `pnpm --filter @cu-tool/api build` — Success  
+**Linting**: ✅ `pnpm lint` — No warnings or errors
+
+**Expected behavior changes**:
+
+- `cards_section` counts may **decrease** (fewer false positives)
+- Footer sections will no longer inflate counts
+- Grid-only layout wrappers excluded via existing `isAEMLayoutWrapper` check
+- More card patterns detected (OR vs AND), but filtered by content+footer rules
+
+---
+
+## TH-19: Fix Accordion Footer Inflation (2026-01-22)
+
+### What changed
+
+Single file modified: [api/src/david-components.ts](../api/src/david-components.ts)
+
+**Added footer/contentinfo exclusion to accordion detector**:
+
+- Method 1 (details/summary pattern): Added `if (el.closest('footer, [role="contentinfo"]')) return false;` before global chrome check
+- Method 2 (ARIA pattern): Added same check before global chrome check
+
+Both methods now exclude accordion candidates within `<footer>` or `[role="contentinfo"]` elements.
+
+### Why
+
+Accordion detector was counting toggle/disclosure elements in footer sections as accordion instances. Footer elements should never be considered content components.
+
+The exclusion runs before counting instances, preventing false positives from global chrome contexts.
+
+### Evidence / Validation
+
+**Compilation**: ✅ `pnpm --filter @cu-tool/api build` — Success  
+**Linting**: ✅ `pnpm lint` — No warnings or errors  
+**Export**: ✅ `pnpm proof:export` — 5 URLs with 8 detection rows  
+**Proof runner**: ✅ `pnpm proof:run` — All 5 pages processed successfully
+
+---
+
 ## TH-17: Carousel Split Logic Implementation (2026-01-22)
 
 ### What was changed
@@ -48,8 +126,8 @@ Single file modified: [api/src/david-components.ts](../api/src/david-components.
 **Added:**
 
 - New helper function `classifyCarouselContainer(container: Element): "image" | "card" | null` (lines 346-470)
-  - Implements hybrid heuristic to classify carousel containers
-  - Ensures mutual exclusivity: a container is classified as either `image_carousel` OR `card_carousel`, never both
+- Implements hybrid heuristic to classify carousel containers
+- Ensures mutual exclusivity: a container is classified as either `image_carousel` OR `card_carousel`, never both
 
 **Modified:**
 
