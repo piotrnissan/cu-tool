@@ -52,8 +52,8 @@
 
 ### Phase 5: Human QA UI
 
-- ✅ **TH-26**: Create `/web/app/qa/page.tsx` skeleton (Size: M, Risk: Low)
-- 🔄 **TH-27**: Implement keyboard shortcuts + component selection dropdown (11 v1 types + "None" + "Other") (Size: M, Risk: Medium)
+- ✅ **TH-26**: Create `/web/app/qa/page.tsx` skeleton (Size: M, Risk: Low) — Done 2026-01-23
+- ✅ **TH-27**: Implement keyboard shortcuts + component selection dropdown (11 v1 types + "None" + "Other") (Size: M, Risk: Medium) — Done 2026-01-23
 - [ ] **TH-28**: Implement variant field dropdowns (media_type for media_text_split, card_type for cards_section/card_carousel) (Size: M, Risk: Medium)
 - [ ] **TH-29**: Implement label appending to JSONL (with corrected_component_key, media_type, card_type, note fields) (Size: M, Risk: Medium)
 - [ ] **TH-30**: Implement auto-advance to next detection (Size: S, Risk: Low)
@@ -94,8 +94,8 @@
 
 **Total tasks**: 42 (+ 3 quality gate classes)
 **Sprints**: 3
-**Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 complete (TH-14 to TH-25)
-**Next step**: TH-27
+**Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 Phase 4 complete (TH-14 to TH-25), Sprint 2 Phase 5 in progress (TH-26 to TH-27 done)
+**Next step**: TH-28
 
 - Sprint 1: TH-01 to TH-13 (13 tasks, S/M risk, 2-3 days)
 - Sprint 2: TH-14 to TH-32 (19 tasks, M/L risk, 4-5 days)
