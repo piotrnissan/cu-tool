@@ -27,10 +27,31 @@ const DECISIONS = [
   "unclear",
 ];
 
+const MEDIA_TYPES = ["image", "video", "carousel", "unknown"];
+const CARD_TYPES = ["product", "offer", "editorial", "unknown"];
+
 export default function QAPage() {
   const [selectedComponent, setSelectedComponent] = useState("none");
   const [decision, setDecision] = useState<string | null>(null);
   const [lastAction, setLastAction] = useState<string | null>(null);
+  const [mediaType, setMediaType] = useState("unknown");
+  const [cardType, setCardType] = useState("unknown");
+
+  // Reset variant state when component changes
+  useEffect(() => {
+    if (selectedComponent === "media_text_split") {
+      if (!MEDIA_TYPES.includes(mediaType)) {
+        setMediaType("unknown");
+      }
+    } else if (
+      selectedComponent === "cards_section" ||
+      selectedComponent === "card_carousel"
+    ) {
+      if (!CARD_TYPES.includes(cardType)) {
+        setCardType("unknown");
+      }
+    }
+  }, [selectedComponent, mediaType, cardType]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -93,6 +114,73 @@ export default function QAPage() {
         </select>
       </div>
 
+      {selectedComponent === "media_text_split" && (
+        <div style={{ marginBottom: "2rem" }}>
+          <label
+            htmlFor="media-type-select"
+            style={{
+              display: "block",
+              marginBottom: "0.5rem",
+              fontWeight: "bold",
+            }}
+          >
+            Media type:
+          </label>
+          <select
+            id="media-type-select"
+            value={mediaType}
+            onChange={(e) => setMediaType(e.target.value)}
+            style={{
+              padding: "0.5rem",
+              fontSize: "1rem",
+              borderRadius: "4px",
+              border: "1px solid #ccc",
+              minWidth: "200px",
+            }}
+          >
+            {MEDIA_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {(selectedComponent === "cards_section" ||
+        selectedComponent === "card_carousel") && (
+        <div style={{ marginBottom: "2rem" }}>
+          <label
+            htmlFor="card-type-select"
+            style={{
+              display: "block",
+              marginBottom: "0.5rem",
+              fontWeight: "bold",
+            }}
+          >
+            Card type:
+          </label>
+          <select
+            id="card-type-select"
+            value={cardType}
+            onChange={(e) => setCardType(e.target.value)}
+            style={{
+              padding: "0.5rem",
+              fontSize: "1rem",
+              borderRadius: "4px",
+              border: "1px solid #ccc",
+              minWidth: "200px",
+            }}
+          >
+            {CARD_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
       <div
         style={{
           border: "2px solid #ccc",
@@ -109,6 +197,15 @@ export default function QAPage() {
           </p>
           <p>
             <strong>Decision:</strong> {decision || "(none)"}
+          </p>
+          <p>
+            <strong>Variant:</strong>{" "}
+            {selectedComponent === "media_text_split"
+              ? `media_type=${mediaType}`
+              : selectedComponent === "cards_section" ||
+                  selectedComponent === "card_carousel"
+                ? `card_type=${cardType}`
+                : "(n/a)"}
           </p>
           <p>
             <strong>Last action:</strong> {lastAction || "(none)"}
