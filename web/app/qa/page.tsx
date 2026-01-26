@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const COMPONENT_TYPES = [
   "none",
@@ -36,6 +36,8 @@ export default function QAPage() {
   const [lastAction, setLastAction] = useState<string | null>(null);
   const [mediaType, setMediaType] = useState("unknown");
   const [cardType, setCardType] = useState("unknown");
+  const [note, setNote] = useState("");
+  const [correctedComponent, setCorrectedComponent] = useState("none");
 
   // Reset variant state when component changes
   useEffect(() => {
@@ -53,6 +55,69 @@ export default function QAPage() {
     }
   }, [selectedComponent, mediaType, cardType]);
 
+  const handleSave = useCallback(async () => {
+    if (!decision) {
+      setLastAction("Save failed: No decision selected");
+      return;
+    }
+
+    const payload: Record<string, unknown> = {
+      timestamp: new Date().toISOString(),
+      page_url: "unknown",
+      component_key: selectedComponent,
+      decision,
+    };
+
+    // Add corrected component key if wrong_type
+    if (decision === "wrong_type") {
+      payload.corrected_component_key = correctedComponent;
+    }
+
+    // Add media_type for media_text_split
+    if (selectedComponent === "media_text_split") {
+      payload.media_type = mediaType;
+    }
+
+    // Add card_type for cards_section / card_carousel
+    if (
+      selectedComponent === "cards_section" ||
+      selectedComponent === "card_carousel"
+    ) {
+      payload.card_type = cardType;
+    }
+
+    // Add note if provided
+    if (note.trim()) {
+      payload.note = note.trim();
+    }
+
+    try {
+      const response = await fetch("/api/qa/append", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const result = await response.json();
+
+      if (result.ok) {
+        const timestamp = new Date().toLocaleTimeString();
+        setLastAction(`Saved at ${timestamp}`);
+      } else {
+        setLastAction(`Save failed: ${result.error || "Unknown error"}`);
+      }
+    } catch (error) {
+      setLastAction(`Save failed: ${String(error)}`);
+    }
+  }, [
+    selectedComponent,
+    decision,
+    mediaType,
+    cardType,
+    note,
+    correctedComponent,
+  ]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Handle number keys 1-5 for decisions
@@ -65,15 +130,14 @@ export default function QAPage() {
       // Handle Ctrl+Enter or Cmd+Enter for save
       if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
         e.preventDefault();
-        const timestamp = new Date().toLocaleTimeString();
-        setLastAction(`Saved at ${timestamp}`);
+        handleSave();
         return;
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [handleSave]);
 
   return (
     <div style={{ padding: "2rem" }}>
@@ -180,6 +244,68 @@ export default function QAPage() {
           </select>
         </div>
       )}
+
+      {decision === "wrong_type" && (
+        <div style={{ marginBottom: "2rem" }}>
+          <label
+            htmlFor="corrected-component-select"
+            style={{
+              display: "block",
+              marginBottom: "0.5rem",
+              fontWeight: "bold",
+            }}
+          >
+            Corrected component type:
+          </label>
+          <select
+            id="corrected-component-select"
+            value={correctedComponent}
+            onChange={(e) => setCorrectedComponent(e.target.value)}
+            style={{
+              padding: "0.5rem",
+              fontSize: "1rem",
+              borderRadius: "4px",
+              border: "1px solid #ccc",
+              minWidth: "200px",
+            }}
+          >
+            {COMPONENT_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {type}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      <div style={{ marginBottom: "2rem" }}>
+        <label
+          htmlFor="note-textarea"
+          style={{
+            display: "block",
+            marginBottom: "0.5rem",
+            fontWeight: "bold",
+          }}
+        >
+          Note (optional):
+        </label>
+        <textarea
+          id="note-textarea"
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          rows={3}
+          style={{
+            padding: "0.5rem",
+            fontSize: "1rem",
+            borderRadius: "4px",
+            border: "1px solid #ccc",
+            width: "100%",
+            maxWidth: "600px",
+            fontFamily: "inherit",
+          }}
+          placeholder="Optional note about this detection..."
+        />
+      </div>
 
       <div
         style={{
