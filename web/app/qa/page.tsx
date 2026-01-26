@@ -30,6 +30,9 @@ const DECISIONS = [
 const MEDIA_TYPES = ["image", "video", "carousel", "unknown"];
 const CARD_TYPES = ["product", "offer", "editorial", "unknown"];
 
+// Demo detections list for auto-advance (placeholder until TH-31+)
+const DEMO_DETECTIONS = ["d1", "d2", "d3", "d4", "d5"];
+
 export default function QAPage() {
   const [selectedComponent, setSelectedComponent] = useState("none");
   const [decision, setDecision] = useState<string | null>(null);
@@ -38,6 +41,7 @@ export default function QAPage() {
   const [cardType, setCardType] = useState("unknown");
   const [note, setNote] = useState("");
   const [correctedComponent, setCorrectedComponent] = useState("none");
+  const [currentDetectionIndex, setCurrentDetectionIndex] = useState(0);
 
   // Reset variant state when component changes
   useEffect(() => {
@@ -102,7 +106,21 @@ export default function QAPage() {
 
       if (result.ok) {
         const timestamp = new Date().toLocaleTimeString();
-        setLastAction(`Saved at ${timestamp}`);
+
+        // Auto-advance to next detection
+        const nextIndex = (currentDetectionIndex + 1) % DEMO_DETECTIONS.length;
+        setCurrentDetectionIndex(nextIndex);
+        const nextId = DEMO_DETECTIONS[nextIndex];
+
+        // Reset form fields for next review
+        setDecision(null);
+        setSelectedComponent("none");
+        setMediaType("unknown");
+        setCardType("unknown");
+        setCorrectedComponent("none");
+        setNote("");
+
+        setLastAction(`Saved at ${timestamp} — Advanced to ${nextId}`);
       } else {
         setLastAction(`Save failed: ${result.error || "Unknown error"}`);
       }
@@ -116,6 +134,7 @@ export default function QAPage() {
     cardType,
     note,
     correctedComponent,
+    currentDetectionIndex,
   ]);
 
   useEffect(() => {
@@ -142,10 +161,24 @@ export default function QAPage() {
   return (
     <div style={{ padding: "2rem" }}>
       <h1>Human QA</h1>
-      <p style={{ marginTop: "1rem", marginBottom: "2rem" }}>
+      <p style={{ marginTop: "1rem", marginBottom: "1rem" }}>
         Use keyboard shortcuts: 1=correct, 2=wrong_type, 3=false_positive,
         4=missing, 5=unclear, Ctrl/Cmd+Enter=save
       </p>
+
+      <div
+        style={{
+          marginBottom: "2rem",
+          padding: "1rem",
+          backgroundColor: "#fff3cd",
+          borderRadius: "4px",
+          border: "1px solid #ffc107",
+        }}
+      >
+        <strong>Detection (demo list):</strong>{" "}
+        {DEMO_DETECTIONS[currentDetectionIndex]} ({currentDetectionIndex + 1}/
+        {DEMO_DETECTIONS.length})
+      </div>
 
       <div style={{ marginBottom: "2rem" }}>
         <label
