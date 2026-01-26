@@ -30,8 +30,39 @@ const DECISIONS = [
 const MEDIA_TYPES = ["image", "video", "carousel", "unknown"];
 const CARD_TYPES = ["product", "offer", "editorial", "unknown"];
 
-// Demo detections list for auto-advance (placeholder until TH-31+)
-const DEMO_DETECTIONS = ["d1", "d2", "d3", "d4", "d5"];
+type Detection = {
+  id: string;
+  page_url: string;
+  component_key: string;
+};
+
+const MOCK_DETECTIONS: Detection[] = [
+  {
+    id: "uk-home-0001",
+    page_url: "https://www.nissan.co.uk/",
+    component_key: "media_text_split",
+  },
+  {
+    id: "uk-home-0002",
+    page_url: "https://www.nissan.co.uk/",
+    component_key: "cards_section",
+  },
+  {
+    id: "uk-qashqai-0012",
+    page_url: "https://www.nissan.co.uk/vehicles/new-vehicles/qashqai.html",
+    component_key: "image_carousel",
+  },
+  {
+    id: "uk-juke-0008",
+    page_url: "https://www.nissan.co.uk/vehicles/new-vehicles/juke.html",
+    component_key: "accordion",
+  },
+  {
+    id: "uk-ariya-0005",
+    page_url: "https://www.nissan.co.uk/vehicles/new-vehicles/ariya.html",
+    component_key: "hero",
+  },
+];
 
 export default function QAPage() {
   const [selectedComponent, setSelectedComponent] = useState("none");
@@ -42,6 +73,18 @@ export default function QAPage() {
   const [note, setNote] = useState("");
   const [correctedComponent, setCorrectedComponent] = useState("none");
   const [currentDetectionIndex, setCurrentDetectionIndex] = useState(0);
+
+  const currentDetection = MOCK_DETECTIONS[currentDetectionIndex];
+
+  // Preselect component based on detected component_key when detection changes
+  useEffect(() => {
+    setSelectedComponent(currentDetection.component_key);
+    setDecision(null);
+    setMediaType("unknown");
+    setCardType("unknown");
+    setCorrectedComponent("none");
+    setNote("");
+  }, [currentDetectionIndex, currentDetection.component_key]);
 
   // Reset variant state when component changes
   useEffect(() => {
@@ -67,7 +110,8 @@ export default function QAPage() {
 
     const payload: Record<string, unknown> = {
       timestamp: new Date().toISOString(),
-      page_url: "unknown",
+      detection_id: currentDetection.id,
+      page_url: currentDetection.page_url,
       component_key: selectedComponent,
       decision,
     };
@@ -108,17 +152,9 @@ export default function QAPage() {
         const timestamp = new Date().toLocaleTimeString();
 
         // Auto-advance to next detection
-        const nextIndex = (currentDetectionIndex + 1) % DEMO_DETECTIONS.length;
+        const nextIndex = (currentDetectionIndex + 1) % MOCK_DETECTIONS.length;
         setCurrentDetectionIndex(nextIndex);
-        const nextId = DEMO_DETECTIONS[nextIndex];
-
-        // Reset form fields for next review
-        setDecision(null);
-        setSelectedComponent("none");
-        setMediaType("unknown");
-        setCardType("unknown");
-        setCorrectedComponent("none");
-        setNote("");
+        const nextId = MOCK_DETECTIONS[nextIndex].id;
 
         setLastAction(`Saved at ${timestamp} — Advanced to ${nextId}`);
       } else {
@@ -135,6 +171,8 @@ export default function QAPage() {
     note,
     correctedComponent,
     currentDetectionIndex,
+    currentDetection.id,
+    currentDetection.page_url,
   ]);
 
   useEffect(() => {
@@ -176,9 +214,19 @@ export default function QAPage() {
           fontSize: "0.9rem",
         }}
       >
-        <strong>Detection (demo list):</strong>{" "}
-        {DEMO_DETECTIONS[currentDetectionIndex]} ({currentDetectionIndex + 1}/
-        {DEMO_DETECTIONS.length})
+        <div>
+          <strong>Detection:</strong> {currentDetectionIndex + 1}/
+          {MOCK_DETECTIONS.length} — {currentDetection.id}
+        </div>
+        <div style={{ marginTop: "0.25rem" }}>
+          <strong>Page:</strong>{" "}
+          {currentDetection.page_url
+            .replace(/^https?:\/\//, "")
+            .replace(/\/$/, "")}
+        </div>
+        <div style={{ marginTop: "0.25rem" }}>
+          <strong>Detected:</strong> {currentDetection.component_key}
+        </div>
       </div>
 
       <div style={{ marginBottom: "1rem" }}>
