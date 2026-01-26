@@ -159,20 +159,21 @@ export default function QAPage() {
   }, [handleSave]);
 
   return (
-    <div style={{ padding: "2rem" }}>
-      <h1>Human QA</h1>
-      <p style={{ marginTop: "1rem", marginBottom: "1rem" }}>
-        Use keyboard shortcuts: 1=correct, 2=wrong_type, 3=false_positive,
-        4=missing, 5=unclear, Ctrl/Cmd+Enter=save
+    <div style={{ padding: "1rem" }}>
+      <p style={{ margin: "0 0 0.75rem 0", fontSize: "0.85rem", opacity: 0.7 }}>
+        1=correct, 2=wrong_type, 3=false_positive, 4=missing, 5=unclear,
+        Cmd+Enter=save
       </p>
 
       <div
         style={{
-          marginBottom: "2rem",
-          padding: "1rem",
+          marginBottom: "1rem",
+          padding: "0.75rem",
           backgroundColor: "#fff3cd",
           borderRadius: "4px",
           border: "1px solid #ffc107",
+          color: "#111",
+          fontSize: "0.9rem",
         }}
       >
         <strong>Detection (demo list):</strong>{" "}
@@ -180,13 +181,14 @@ export default function QAPage() {
         {DEMO_DETECTIONS.length})
       </div>
 
-      <div style={{ marginBottom: "2rem" }}>
+      <div style={{ marginBottom: "1rem" }}>
         <label
           htmlFor="component-select"
           style={{
             display: "block",
-            marginBottom: "0.5rem",
+            marginBottom: "0.35rem",
             fontWeight: "bold",
+            fontSize: "0.9rem",
           }}
         >
           Component Type:
@@ -212,13 +214,14 @@ export default function QAPage() {
       </div>
 
       {selectedComponent === "media_text_split" && (
-        <div style={{ marginBottom: "2rem" }}>
+        <div style={{ marginBottom: "1rem" }}>
           <label
             htmlFor="media-type-select"
             style={{
               display: "block",
-              marginBottom: "0.5rem",
+              marginBottom: "0.35rem",
               fontWeight: "bold",
+              fontSize: "0.9rem",
             }}
           >
             Media type:
@@ -246,13 +249,14 @@ export default function QAPage() {
 
       {(selectedComponent === "cards_section" ||
         selectedComponent === "card_carousel") && (
-        <div style={{ marginBottom: "2rem" }}>
+        <div style={{ marginBottom: "1rem" }}>
           <label
             htmlFor="card-type-select"
             style={{
               display: "block",
-              marginBottom: "0.5rem",
+              marginBottom: "0.35rem",
               fontWeight: "bold",
+              fontSize: "0.9rem",
             }}
           >
             Card type:
@@ -279,13 +283,14 @@ export default function QAPage() {
       )}
 
       {decision === "wrong_type" && (
-        <div style={{ marginBottom: "2rem" }}>
+        <div style={{ marginBottom: "1rem" }}>
           <label
             htmlFor="corrected-component-select"
             style={{
               display: "block",
-              marginBottom: "0.5rem",
+              marginBottom: "0.35rem",
               fontWeight: "bold",
+              fontSize: "0.9rem",
             }}
           >
             Corrected component type:
@@ -311,13 +316,14 @@ export default function QAPage() {
         </div>
       )}
 
-      <div style={{ marginBottom: "2rem" }}>
+      <div style={{ marginBottom: "1rem" }}>
         <label
           htmlFor="note-textarea"
           style={{
             display: "block",
-            marginBottom: "0.5rem",
+            marginBottom: "0.35rem",
             fontWeight: "bold",
+            fontSize: "0.9rem",
           }}
         >
           Note (optional):
@@ -326,7 +332,7 @@ export default function QAPage() {
           id="note-textarea"
           value={note}
           onChange={(e) => setNote(e.target.value)}
-          rows={3}
+          rows={2}
           style={{
             padding: "0.5rem",
             fontSize: "1rem",
@@ -342,15 +348,18 @@ export default function QAPage() {
 
       <div
         style={{
-          border: "2px solid #ccc",
-          padding: "1.5rem",
+          border: "1px solid #ccc",
+          padding: "0.75rem",
           borderRadius: "4px",
-          backgroundColor: "#f9f9f9",
-          marginBottom: "1rem",
+          backgroundColor: "rgba(255,255,255,0.06)",
+          color: "inherit",
+          marginBottom: "0.5rem",
         }}
       >
-        <h2 style={{ marginTop: 0, fontSize: "1.2rem" }}>Current State</h2>
-        <div style={{ marginTop: "1rem" }}>
+        <h2 style={{ marginTop: 0, marginBottom: "0.5rem", fontSize: "1rem" }}>
+          Current State
+        </h2>
+        <div style={{ fontSize: "0.9rem" }}>
           <p>
             <strong>Selected component:</strong> {selectedComponent}
           </p>
