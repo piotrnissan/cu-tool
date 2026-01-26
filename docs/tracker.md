@@ -57,7 +57,7 @@
 - ✅ **TH-28**: Implement variant field dropdowns (media_type for media_text_split, card_type for cards_section/card_carousel) (Size: M, Risk: Medium) - Done 2026-01-26
 - ✅ **TH-29**: Implement label appending to JSONL (with corrected_component_key, media_type, card_type, note fields) (Size: M, Risk: Medium) - Done 2026-01-26
 - ✅ **TH-30**: Implement auto-advance to next detection (Size: S, Risk: Low) - Done 2026-01-26
-- [ ] **TH-31**: Test QA UI with 1-2 pages (Size: M, Risk: Medium)
+- ✅ **TH-31**: Test QA UI with 1-2 pages (Size: M, Risk: Medium) - Typed mock detections, auto-advance, keyboard-first compact QA UI - Done 2026-01-26
 - [ ] **TH-32**: Document QA UI in `docs/visual-proof/qa-ui.md` (Size: S, Risk: Low)
 
 ---
@@ -94,8 +94,8 @@
 
 **Total tasks**: 42 (+ 3 quality gate classes)
 **Sprints**: 3
-**Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 Phase 4 complete (TH-14 to TH-25), Sprint 2 Phase 5 in progress (TH-26 to TH-30 done)
-**Next step**: TH-31
+**Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 Phase 4 complete (TH-14 to TH-25), Sprint 2 Phase 5 in progress (TH-26 to TH-31 done)
+**Next step**: TH-32
 
 - Sprint 1: TH-01 to TH-13 (13 tasks, S/M risk, 2-3 days)
 - Sprint 2: TH-14 to TH-32 (19 tasks, M/L risk, 4-5 days)
