@@ -32,7 +32,7 @@
 
 ## Sprint 2: Detector Hardening + Human QA UI (M/L, 3-4 days)
 
--### Phase 4: Detector Hardening
+### Phase 4: Detector Hardening
 
 **Execution Order**: All 11 component types (v1 model) in priority sequence by corruption risk
 
@@ -59,7 +59,11 @@
 - ✅ **TH-30**: Implement auto-advance to next detection (Size: S, Risk: Low) - Done 2026-01-26
 - ✅ **TH-31**: Test QA UI with 1-2 pages (Size: M, Risk: Medium) - Typed mock detections, auto-advance, keyboard-first compact QA UI - Done 2026-01-26
 - ✅ **TH-32.1**: QA UI: 2-column layout + preview placeholder (Size: S, Risk: Low) - Refactor QA UI to a fixed-width left column (no vertical scroll) and a right-side Preview panel with placeholder for screenshot rendering. This task prepares the UI for TH-33. - Done 2026-01-26
-- ✅ **TH-32**: Document QA UI in `docs/visual-proof/qa-ui.md` (Size: S, Risk: Low)
+- ✅ **TH-32**: Document QA UI in `docs/visual-proof/qa-ui.md` (Size: S, Risk: Low) — Done 2026-01-26
+- ☐ **TH-32.2**: Load real detection instances from proof-pack manifests (Size: M, Risk: Medium) — Replace typed mock detections in QA UI with a real queue built from manifest.json files under analysis/artifacts/visual-proof/full/\*\*. Each queue item must include: slug, page_url, component_key, bbox, and a deterministic detection_id.
+- ☐ **TH-32.3**: Implement QA preview (annotated screenshot + bbox highlight) (Size: M, Risk: Medium) — Right column renders the annotated full-page screenshot and visually highlights the current bbox instance from the queue. MVP: image render + bbox rectangle; scroll-to-bbox optional.
+- ☐ **TH-32.4**: Generate first real QA labels.jsonl for v1-uk proof pack (Size: QA, Risk: Medium) — Perform a manual QA pass using /qa and produce analysis/qa-results/v1-uk/labels.jsonl with real decisions (correct/wrong/false_positive/etc). Target: ≥50 scored labels total (scored = correct + wrong_type + false_positive), or ≥10 scored per Class A component.
+- ☐ **TH-32.5**: Phase 5 DoD check (labels.jsonl readiness) (Size: S, Risk: Low) — Confirm labels.jsonl exists, is non-empty, and each line contains: timestamp, detection_id, page_url, component_key, decision.
 
 ---
 
@@ -67,43 +71,45 @@
 
 ### Phase 6: Regression Harness
 
-- [ ] **TH-33**: Create `analysis/scripts/regression-check.ts` (Size: M, Risk: Low)
-- [ ] **TH-34**: Define impact-class quality gates (Class A: 90%, Class B: 85%, Class C: 80%) + minimum sample size rule (≥10 labels) (Size: M, Risk: Low)
-- [ ] **TH-35**: Generate regression report (precision per component + pass/fail/insufficient) (Size: M, Risk: Low)
-- [ ] **TH-36**: Implement gate validator with sample size check (Size: S, Risk: Low)
-- [ ] **TH-37**: Document gates in `docs/visual-proof/quality-gates.md` (Size: S, Risk: Low)
+**Phase 6 starts only after Phase 5 DoD (TH-32.5).**
+
+- ☐ **TH-33**: Create `analysis/scripts/regression-check.ts` (Size: M, Risk: Low)
+- ☐ **TH-34**: Define impact-class quality gates (Class A: 90%, Class B: 85%, Class C: 80%) + minimum sample size rule (≥10 labels) (Size: M, Risk: Low)
+- ☐ **TH-35**: Generate regression report (precision per component + pass/fail/insufficient) (Size: M, Risk: Low)
+- ☐ **TH-36**: Implement gate validator with sample size check (Size: S, Risk: Low)
+- ☐ **TH-37**: Document gates in `docs/visual-proof/quality-gates.md` (Size: S, Risk: Low)
 
 ### Phase 7: Return to UK Analysis
 
-- [ ] **TH-38**: Verify all quality gates pass (or insufficient sample for low-volume components) (Size: S, Risk: Critical)
-- [ ] **TH-39**: Reset UK dataset in `david_component_usage` (Size: S, Risk: High)
-- [ ] **TH-40**: Run full UK analysis with hardened detectors (Size: XL, Risk: High)
-- [ ] **TH-41**: Generate final analysis reports (Size: M, Risk: Low)
-- [ ] **TH-42**: Update `.github/response.md` with post-gate results (Size: M, Risk: Low)
+- ☐ **TH-38**: Verify all quality gates pass (or insufficient sample for low-volume components) (Size: S, Risk: Critical)
+- ☐ **TH-39**: Reset UK dataset in `david_component_usage` (Size: S, Risk: High)
+- ☐ **TH-40**: Run full UK analysis with hardened detectors (Size: XL, Risk: High)
+- ☐ **TH-41**: Generate final analysis reports (Size: M, Risk: Low)
+- ☐ **TH-42**: Update `.github/response.md` with post-gate results (Size: M, Risk: Low)
 
 ---
 
 ## Quality Gates (explicit tasks)
 
-- [ ] **QG-01**: Class A Pass (accordion ≥ 90%, cards_section ≥ 90%) (Size: QA, Risk: High)
-- [ ] **QG-02**: Class B Pass (image_carousel ≥ 85%, card_carousel ≥ 85%) (Size: QA, Risk: High)
-- [ ] **QG-03**: Class C Pass (hero, media_text_split, promo_section, info_specs, next_action_panel, tabs, anchor_nav ≥ 80%) (Size: QA, Risk: Medium)
+- ☐ **QG-01**: Class A Pass (accordion ≥ 90%, cards_section ≥ 90%) (Size: QA, Risk: High)
+- ☐ **QG-02**: Class B Pass (image_carousel ≥ 85%, card_carousel ≥ 85%) (Size: QA, Risk: High)
+- ☐ **QG-03**: Class C Pass (hero, media_text_split, promo_section, info_specs, next_action_panel, tabs, anchor_nav ≥ 80%) (Size: QA, Risk: Medium)
 
 ---
 
 ## Summary
 
-**Total tasks**: 42 (+ 3 quality gate classes)
+**Total tasks**: 46 (+ 3 quality gate classes)
 **Sprints**: 3
-**Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 Phase 4 complete (TH-14 to TH-25), Sprint 2 Phase 5 complete (TH-26 to TH-32)
-**Next step**: TH-33
+**Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 Phase 4 complete (TH-14 to TH-25), Sprint 2 Phase 5 in progress (TH-26 to TH-32.5)
+**Next step**: TH-32.2
 
 - Sprint 1: TH-01 to TH-13 (13 tasks, S/M risk, 2-3 days)
-- Sprint 2: TH-14 to TH-32 (19 tasks, M/L risk, 4-5 days)
+- Sprint 2: TH-14 to TH-32.5 (23 tasks, M/L risk, 4-5 days)
 - Sprint 3: TH-33 to TH-42 (10 tasks, M risk, 2-3 days)
 
 ---
 
 ## Backlog (Post-POC / Future Enhancements)
 
-- [ ] **TH-01.1**: Optional: backfill `final_url`/`canonical_url` for fetched rows where NULL to enable redirect-based resolution in proof pack export (Size: S, Risk: Low)
+- ☐ **TH-01.1**: Optional: backfill `final_url`/`canonical_url` for fetched rows where NULL to enable redirect-based resolution in proof pack export (Size: S, Risk: Low)
