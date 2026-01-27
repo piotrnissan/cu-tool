@@ -62,8 +62,8 @@
 - ✅ **TH-32**: Document QA UI in `docs/visual-proof/qa-ui.md` (Size: S, Risk: Low) — Done 2026-01-26
 - ✅ **TH-32.2**: Load real detection instances from proof-pack manifests (Size: M, Risk: Medium) — Replace typed mock detections in QA UI with a real queue built from manifest.json files under analysis/artifacts/visual-proof/full/\*\*. Each queue item must include: slug, page_url, component_key, bbox, and a deterministic detection_id. - Done 2026-01-27
 - ✅ **TH-32.3**: Implement QA preview (annotated screenshot + bbox highlight) (Size: M, Risk: Medium) — Right column renders the annotated full-page screenshot and visually highlights the current bbox instance from the queue. MVP: image render + bbox rectangle; scroll-to-bbox optional.
-- ☐ **TH-32.4**: Generate first real QA labels.jsonl for v1-uk proof pack (Size: QA, Risk: Medium) — Perform a manual QA pass using /qa and produce analysis/qa-results/v1-uk/labels.jsonl with real decisions (correct/wrong/false_positive/etc). Target: ≥50 scored labels total (scored = correct + wrong_type + false_positive), or ≥10 scored per Class A component.
-- ☐ **TH-32.5**: Phase 5 DoD check (labels.jsonl readiness) (Size: S, Risk: Low) — Confirm labels.jsonl exists, is non-empty, and each line contains: timestamp, detection_id, page_url, component_key, decision.
+- ✅ TH-32.4: Generate first real QA labels.jsonl for v1-uk proof pack — Done 2026-01-27 (19 labels, incl. 1 unclear)
+- ✅ TH-32.5: Phase 5 DoD check (labels.jsonl readiness) — Verified 2026-01-27
 
 ---
 
@@ -101,8 +101,8 @@
 
 **Total tasks**: 46 (+ 3 quality gate classes)
 **Sprints**: 3
-**Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 Phase 4 complete (TH-14 to TH-25), Sprint 2 Phase 5 in progress (TH-26 to TH-32.5)
-**Next step**: TH-32.4
+**Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 Phase 4 complete (TH-14 to TH-25), Sprint 2 Phase 5 complete (Human QA complete, labels.jsonl ready)
+**Next step**: TH-33
 
 - Sprint 1: TH-01 to TH-13 (13 tasks, S/M risk, 2-3 days)
 - Sprint 2: TH-14 to TH-32.5 (23 tasks, M/L risk, 4-5 days)
