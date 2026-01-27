@@ -52,6 +52,7 @@ export async function GET(request: NextRequest) {
       status: 200,
       headers: {
         "Content-Type": "image/png",
+        "Content-Length": buffer.length.toString(),
         "Cache-Control": "no-store",
       },
     });
