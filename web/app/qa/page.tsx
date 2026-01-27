@@ -30,41 +30,25 @@ const DECISIONS = [
 const MEDIA_TYPES = ["image", "video", "carousel", "unknown"];
 const CARD_TYPES = ["product", "offer", "editorial", "unknown"];
 
-type Detection = {
-  id: string;
+interface BoundingBox {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+interface Detection {
+  detection_id: string;
+  slug: string;
   page_url: string;
   component_key: string;
-};
-
-const MOCK_DETECTIONS: Detection[] = [
-  {
-    id: "uk-home-0001",
-    page_url: "https://www.nissan.co.uk/",
-    component_key: "media_text_split",
-  },
-  {
-    id: "uk-home-0002",
-    page_url: "https://www.nissan.co.uk/",
-    component_key: "cards_section",
-  },
-  {
-    id: "uk-qashqai-0012",
-    page_url: "https://www.nissan.co.uk/vehicles/new-vehicles/qashqai.html",
-    component_key: "image_carousel",
-  },
-  {
-    id: "uk-juke-0008",
-    page_url: "https://www.nissan.co.uk/vehicles/new-vehicles/juke.html",
-    component_key: "accordion",
-  },
-  {
-    id: "uk-ariya-0005",
-    page_url: "https://www.nissan.co.uk/vehicles/new-vehicles/ariya.html",
-    component_key: "hero",
-  },
-];
+  bbox: BoundingBox;
+}
 
 export default function QAPage() {
+  const [detections, setDetections] = useState<Detection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedComponent, setSelectedComponent] = useState("none");
   const [decision, setDecision] = useState<string | null>(null);
   const [lastAction, setLastAction] = useState<string | null>(null);
@@ -74,17 +58,49 @@ export default function QAPage() {
   const [correctedComponent, setCorrectedComponent] = useState("none");
   const [currentDetectionIndex, setCurrentDetectionIndex] = useState(0);
 
-  const currentDetection = MOCK_DETECTIONS[currentDetectionIndex];
+  // Load detections from API on mount
+  useEffect(() => {
+    async function loadDetections() {
+      try {
+        setLoading(true);
+        const response = await fetch("/api/qa/detections");
+        const result = await response.json();
+
+        if (!result.ok) {
+          setError(result.error || "Failed to load detections");
+          return;
+        }
+
+        if (result.items.length === 0) {
+          setError("No detection instances found in proof pack");
+          return;
+        }
+
+        setDetections(result.items);
+        setError(null);
+      } catch (err) {
+        setError(`Failed to load detections: ${String(err)}`);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadDetections();
+  }, []);
+
+  const currentDetection = detections[currentDetectionIndex];
 
   // Preselect component based on detected component_key when detection changes
   useEffect(() => {
+    if (!currentDetection) return;
+
     setSelectedComponent(currentDetection.component_key);
     setDecision(null);
     setMediaType("unknown");
     setCardType("unknown");
     setCorrectedComponent("none");
     setNote("");
-  }, [currentDetectionIndex, currentDetection.component_key]);
+  }, [currentDetectionIndex, currentDetection]);
 
   // Reset variant state when component changes
   useEffect(() => {
@@ -108,9 +124,14 @@ export default function QAPage() {
       return;
     }
 
+    if (!currentDetection) {
+      setLastAction("Save failed: No detection loaded");
+      return;
+    }
+
     const payload: Record<string, unknown> = {
       timestamp: new Date().toISOString(),
-      detection_id: currentDetection.id,
+      detection_id: currentDetection.detection_id,
       page_url: currentDetection.page_url,
       component_key: selectedComponent,
       decision,
@@ -152,9 +173,9 @@ export default function QAPage() {
         const timestamp = new Date().toLocaleTimeString();
 
         // Auto-advance to next detection
-        const nextIndex = (currentDetectionIndex + 1) % MOCK_DETECTIONS.length;
+        const nextIndex = (currentDetectionIndex + 1) % detections.length;
         setCurrentDetectionIndex(nextIndex);
-        const nextId = MOCK_DETECTIONS[nextIndex].id;
+        const nextId = detections[nextIndex]?.detection_id || "end";
 
         setLastAction(`Saved at ${timestamp} — Advanced to ${nextId}`);
       } else {
@@ -171,8 +192,8 @@ export default function QAPage() {
     note,
     correctedComponent,
     currentDetectionIndex,
-    currentDetection.id,
-    currentDetection.page_url,
+    currentDetection,
+    detections,
   ]);
 
   useEffect(() => {
@@ -214,239 +235,272 @@ export default function QAPage() {
           borderRight: "1px solid #ccc",
         }}
       >
-        <p
-          style={{ margin: "0 0 0.75rem 0", fontSize: "0.85rem", opacity: 0.7 }}
-        >
-          1=correct, 2=wrong_type, 3=false_positive, 4=missing, 5=unclear,
-          Cmd+Enter=save
-        </p>
+        {loading && (
+          <div style={{ padding: "2rem", textAlign: "center" }}>
+            <p>Loading detection queue...</p>
+          </div>
+        )}
 
-        <div
-          style={{
-            marginBottom: "1rem",
-            padding: "0.75rem",
-            backgroundColor: "#fff3cd",
-            borderRadius: "4px",
-            border: "1px solid #ffc107",
-            color: "#111",
-            fontSize: "0.9rem",
-          }}
-        >
-          <div>
-            <strong>Detection:</strong> {currentDetectionIndex + 1}/
-            {MOCK_DETECTIONS.length} — {currentDetection.id}
-          </div>
-          <div style={{ marginTop: "0.25rem" }}>
-            <strong>Page:</strong>{" "}
-            {currentDetection.page_url
-              .replace(/^https?:\/\//, "")
-              .replace(/\/$/, "")}
-          </div>
-          <div style={{ marginTop: "0.25rem" }}>
-            <strong>Detected:</strong> {currentDetection.component_key}
-          </div>
-        </div>
-
-        <div style={{ marginBottom: "1rem" }}>
-          <label
-            htmlFor="component-select"
+        {error && (
+          <div
             style={{
-              display: "block",
-              marginBottom: "0.35rem",
-              fontWeight: "bold",
+              padding: "1rem",
+              backgroundColor: "#f8d7da",
+              borderRadius: "4px",
+              border: "1px solid #f5c2c7",
+              color: "#842029",
               fontSize: "0.9rem",
             }}
           >
-            Component Type:
-          </label>
-          <select
-            id="component-select"
-            value={selectedComponent}
-            onChange={(e) => setSelectedComponent(e.target.value)}
-            style={{
-              padding: "0.5rem",
-              fontSize: "1rem",
-              borderRadius: "4px",
-              border: "1px solid #ccc",
-              minWidth: "200px",
-            }}
-          >
-            {COMPONENT_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {type}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {selectedComponent === "media_text_split" && (
-          <div style={{ marginBottom: "1rem" }}>
-            <label
-              htmlFor="media-type-select"
-              style={{
-                display: "block",
-                marginBottom: "0.35rem",
-                fontWeight: "bold",
-                fontSize: "0.9rem",
-              }}
-            >
-              Media type:
-            </label>
-            <select
-              id="media-type-select"
-              value={mediaType}
-              onChange={(e) => setMediaType(e.target.value)}
-              style={{
-                padding: "0.5rem",
-                fontSize: "1rem",
-                borderRadius: "4px",
-                border: "1px solid #ccc",
-                minWidth: "200px",
-              }}
-            >
-              {MEDIA_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
+            <strong>Error:</strong> {error}
           </div>
         )}
 
-        {(selectedComponent === "cards_section" ||
-          selectedComponent === "card_carousel") && (
-          <div style={{ marginBottom: "1rem" }}>
-            <label
-              htmlFor="card-type-select"
+        {!loading && !error && detections.length > 0 && currentDetection && (
+          <>
+            <p
               style={{
-                display: "block",
-                marginBottom: "0.35rem",
-                fontWeight: "bold",
+                margin: "0 0 0.75rem 0",
+                fontSize: "0.85rem",
+                opacity: 0.7,
+              }}
+            >
+              1=correct, 2=wrong_type, 3=false_positive, 4=missing, 5=unclear,
+              Cmd+Enter=save
+            </p>
+
+            <div
+              style={{
+                marginBottom: "1rem",
+                padding: "0.75rem",
+                backgroundColor: "#fff3cd",
+                borderRadius: "4px",
+                border: "1px solid #ffc107",
+                color: "#111",
                 fontSize: "0.9rem",
               }}
             >
-              Card type:
-            </label>
-            <select
-              id="card-type-select"
-              value={cardType}
-              onChange={(e) => setCardType(e.target.value)}
+              <div>
+                <strong>Detection:</strong> {currentDetectionIndex + 1}/
+                {detections.length} — {currentDetection.detection_id}
+              </div>
+              <div style={{ marginTop: "0.25rem" }}>
+                <strong>Page:</strong>{" "}
+                {currentDetection.page_url
+                  .replace(/^https?:\/\//, "")
+                  .replace(/\/$/, "")}
+              </div>
+              <div style={{ marginTop: "0.25rem" }}>
+                <strong>Detected:</strong> {currentDetection.component_key}
+              </div>
+            </div>
+
+            <div style={{ marginBottom: "1rem" }}>
+              <label
+                htmlFor="component-select"
+                style={{
+                  display: "block",
+                  marginBottom: "0.35rem",
+                  fontWeight: "bold",
+                  fontSize: "0.9rem",
+                }}
+              >
+                Component Type:
+              </label>
+              <select
+                id="component-select"
+                value={selectedComponent}
+                onChange={(e) => setSelectedComponent(e.target.value)}
+                style={{
+                  padding: "0.5rem",
+                  fontSize: "1rem",
+                  borderRadius: "4px",
+                  border: "1px solid #ccc",
+                  minWidth: "200px",
+                }}
+              >
+                {COMPONENT_TYPES.map((type) => (
+                  <option key={type} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {selectedComponent === "media_text_split" && (
+              <div style={{ marginBottom: "1rem" }}>
+                <label
+                  htmlFor="media-type-select"
+                  style={{
+                    display: "block",
+                    marginBottom: "0.35rem",
+                    fontWeight: "bold",
+                    fontSize: "0.9rem",
+                  }}
+                >
+                  Media type:
+                </label>
+                <select
+                  id="media-type-select"
+                  value={mediaType}
+                  onChange={(e) => setMediaType(e.target.value)}
+                  style={{
+                    padding: "0.5rem",
+                    fontSize: "1rem",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                    minWidth: "200px",
+                  }}
+                >
+                  {MEDIA_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {(selectedComponent === "cards_section" ||
+              selectedComponent === "card_carousel") && (
+              <div style={{ marginBottom: "1rem" }}>
+                <label
+                  htmlFor="card-type-select"
+                  style={{
+                    display: "block",
+                    marginBottom: "0.35rem",
+                    fontWeight: "bold",
+                    fontSize: "0.9rem",
+                  }}
+                >
+                  Card type:
+                </label>
+                <select
+                  id="card-type-select"
+                  value={cardType}
+                  onChange={(e) => setCardType(e.target.value)}
+                  style={{
+                    padding: "0.5rem",
+                    fontSize: "1rem",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                    minWidth: "200px",
+                  }}
+                >
+                  {CARD_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            {decision === "wrong_type" && (
+              <div style={{ marginBottom: "1rem" }}>
+                <label
+                  htmlFor="corrected-component-select"
+                  style={{
+                    display: "block",
+                    marginBottom: "0.35rem",
+                    fontWeight: "bold",
+                    fontSize: "0.9rem",
+                  }}
+                >
+                  Corrected component type:
+                </label>
+                <select
+                  id="corrected-component-select"
+                  value={correctedComponent}
+                  onChange={(e) => setCorrectedComponent(e.target.value)}
+                  style={{
+                    padding: "0.5rem",
+                    fontSize: "1rem",
+                    borderRadius: "4px",
+                    border: "1px solid #ccc",
+                    minWidth: "200px",
+                  }}
+                >
+                  {COMPONENT_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <div style={{ marginBottom: "1rem" }}>
+              <label
+                htmlFor="note-textarea"
+                style={{
+                  display: "block",
+                  marginBottom: "0.35rem",
+                  fontWeight: "bold",
+                  fontSize: "0.9rem",
+                }}
+              >
+                Note (optional):
+              </label>
+              <textarea
+                id="note-textarea"
+                value={note}
+                onChange={(e) => setNote(e.target.value)}
+                rows={2}
+                style={{
+                  padding: "0.5rem",
+                  fontSize: "1rem",
+                  borderRadius: "4px",
+                  border: "1px solid #ccc",
+                  width: "100%",
+                  fontFamily: "inherit",
+                }}
+                placeholder="Optional note about this detection..."
+              />
+            </div>
+
+            <div
               style={{
-                padding: "0.5rem",
-                fontSize: "1rem",
-                borderRadius: "4px",
                 border: "1px solid #ccc",
-                minWidth: "200px",
-              }}
-            >
-              {CARD_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-          </div>
-        )}
-
-        {decision === "wrong_type" && (
-          <div style={{ marginBottom: "1rem" }}>
-            <label
-              htmlFor="corrected-component-select"
-              style={{
-                display: "block",
-                marginBottom: "0.35rem",
-                fontWeight: "bold",
-                fontSize: "0.9rem",
-              }}
-            >
-              Corrected component type:
-            </label>
-            <select
-              id="corrected-component-select"
-              value={correctedComponent}
-              onChange={(e) => setCorrectedComponent(e.target.value)}
-              style={{
-                padding: "0.5rem",
-                fontSize: "1rem",
+                padding: "0.75rem",
                 borderRadius: "4px",
-                border: "1px solid #ccc",
-                minWidth: "200px",
+                backgroundColor: "rgba(255,255,255,0.06)",
+                color: "inherit",
+                marginBottom: "0.5rem",
               }}
             >
-              {COMPONENT_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-          </div>
+              <h2
+                style={{
+                  marginTop: 0,
+                  marginBottom: "0.5rem",
+                  fontSize: "1rem",
+                }}
+              >
+                Current State
+              </h2>
+              <div style={{ fontSize: "0.9rem" }}>
+                <p>
+                  <strong>Selected component:</strong> {selectedComponent}
+                </p>
+                <p>
+                  <strong>Decision:</strong> {decision || "(none)"}
+                </p>
+                <p>
+                  <strong>Variant:</strong>{" "}
+                  {selectedComponent === "media_text_split"
+                    ? `media_type=${mediaType}`
+                    : selectedComponent === "cards_section" ||
+                        selectedComponent === "card_carousel"
+                      ? `card_type=${cardType}`
+                      : "(n/a)"}
+                </p>
+                <p>
+                  <strong>Last action:</strong> {lastAction || "(none)"}
+                </p>
+              </div>
+            </div>
+          </>
         )}
-
-        <div style={{ marginBottom: "1rem" }}>
-          <label
-            htmlFor="note-textarea"
-            style={{
-              display: "block",
-              marginBottom: "0.35rem",
-              fontWeight: "bold",
-              fontSize: "0.9rem",
-            }}
-          >
-            Note (optional):
-          </label>
-          <textarea
-            id="note-textarea"
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            rows={2}
-            style={{
-              padding: "0.5rem",
-              fontSize: "1rem",
-              borderRadius: "4px",
-              border: "1px solid #ccc",
-              width: "100%",
-              fontFamily: "inherit",
-            }}
-            placeholder="Optional note about this detection..."
-          />
-        </div>
-
-        <div
-          style={{
-            border: "1px solid #ccc",
-            padding: "0.75rem",
-            borderRadius: "4px",
-            backgroundColor: "rgba(255,255,255,0.06)",
-            color: "inherit",
-            marginBottom: "0.5rem",
-          }}
-        >
-          <h2
-            style={{ marginTop: 0, marginBottom: "0.5rem", fontSize: "1rem" }}
-          >
-            Current State
-          </h2>
-          <div style={{ fontSize: "0.9rem" }}>
-            <p>
-              <strong>Selected component:</strong> {selectedComponent}
-            </p>
-            <p>
-              <strong>Decision:</strong> {decision || "(none)"}
-            </p>
-            <p>
-              <strong>Variant:</strong>{" "}
-              {selectedComponent === "media_text_split"
-                ? `media_type=${mediaType}`
-                : selectedComponent === "cards_section" ||
-                    selectedComponent === "card_carousel"
-                  ? `card_type=${cardType}`
-                  : "(n/a)"}
-            </p>
-            <p>
-              <strong>Last action:</strong> {lastAction || "(none)"}
-            </p>
-          </div>
-        </div>
       </div>
 
       {/* RIGHT COLUMN: Preview Panel */}
