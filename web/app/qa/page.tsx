@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const COMPONENT_TYPES = [
   "none",
@@ -57,6 +57,14 @@ export default function QAPage() {
   const [note, setNote] = useState("");
   const [correctedComponent, setCorrectedComponent] = useState("none");
   const [currentDetectionIndex, setCurrentDetectionIndex] = useState(0);
+  const [imageDimensions, setImageDimensions] = useState<{
+    naturalWidth: number;
+    naturalHeight: number;
+    renderedWidth: number;
+    renderedHeight: number;
+  } | null>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const previewRef = useRef<HTMLDivElement>(null);
 
   // Load detections from API on mount
   useEffect(() => {
@@ -89,6 +97,45 @@ export default function QAPage() {
   }, []);
 
   const currentDetection = detections[currentDetectionIndex];
+
+  // Update image dimensions when detection changes if image is already loaded
+  useEffect(() => {
+    if (imageRef.current && imageRef.current.complete) {
+      setImageDimensions({
+        naturalWidth: imageRef.current.naturalWidth,
+        naturalHeight: imageRef.current.naturalHeight,
+        renderedWidth: imageRef.current.offsetWidth,
+        renderedHeight: imageRef.current.offsetHeight,
+      });
+    }
+  }, [currentDetectionIndex]);
+
+  // Auto-scroll preview to bbox when detection changes
+  useEffect(() => {
+    if (
+      !currentDetection ||
+      !currentDetection.bbox ||
+      !imageDimensions ||
+      !previewRef.current
+    ) {
+      return;
+    }
+
+    // Use requestAnimationFrame to ensure layout is complete
+    requestAnimationFrame(() => {
+      if (!previewRef.current || !imageDimensions || !currentDetection.bbox) {
+        return;
+      }
+
+      const { naturalHeight, renderedHeight } = imageDimensions;
+      const scaleY = renderedHeight / naturalHeight;
+      const scaledTop = currentDetection.bbox.y * scaleY;
+
+      // Scroll with 80px top padding
+      const targetScrollTop = Math.max(0, scaledTop - 80);
+      previewRef.current.scrollTo({ top: targetScrollTop, behavior: "auto" });
+    });
+  }, [currentDetectionIndex, imageDimensions, currentDetection]);
 
   // Preselect component based on detected component_key when detection changes
   useEffect(() => {
@@ -282,7 +329,17 @@ export default function QAPage() {
             >
               <div>
                 <strong>Detection:</strong> {currentDetectionIndex + 1}/
-                {detections.length} — {currentDetection.detection_id}
+                {detections.length} —{" "}
+                {(() => {
+                  const parts = currentDetection.detection_id.split(":");
+                  if (parts.length === 3) {
+                    const index = parseInt(parts[2], 10);
+                    if (!isNaN(index)) {
+                      return `${parts[0]}:${parts[1]}:${index + 1}`;
+                    }
+                  }
+                  return currentDetection.detection_id;
+                })()}
               </div>
               <div style={{ marginTop: "0.25rem" }}>
                 <strong>Page:</strong>{" "}
@@ -291,7 +348,11 @@ export default function QAPage() {
                   .replace(/\/$/, "")}
               </div>
               <div style={{ marginTop: "0.25rem" }}>
-                <strong>Detected:</strong> {currentDetection.component_key}
+                <strong>Instance:</strong> {currentDetection.component_key} #
+                {parseInt(
+                  currentDetection.detection_id.split(":").pop() || "0",
+                  10,
+                ) + 1}
               </div>
             </div>
 
@@ -505,6 +566,7 @@ export default function QAPage() {
 
       {/* RIGHT COLUMN: Preview Panel */}
       <div
+        ref={previewRef}
         style={{
           flex: 1,
           overflow: "auto",
@@ -561,9 +623,10 @@ export default function QAPage() {
         )}
 
         {!loading && !error && currentDetection && (
-          <div>
+          <div style={{ position: "relative", display: "inline-block" }}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
+              ref={imageRef}
               src={`/api/qa/screenshot?slug=${currentDetection.slug}`}
               alt={`Annotated screenshot for ${currentDetection.slug}`}
               style={{
@@ -571,7 +634,51 @@ export default function QAPage() {
                 height: "auto",
                 display: "block",
               }}
+              onLoad={() => {
+                if (imageRef.current) {
+                  setImageDimensions({
+                    naturalWidth: imageRef.current.naturalWidth,
+                    naturalHeight: imageRef.current.naturalHeight,
+                    renderedWidth: imageRef.current.offsetWidth,
+                    renderedHeight: imageRef.current.offsetHeight,
+                  });
+                }
+              }}
             />
+            {imageDimensions &&
+              currentDetection.bbox &&
+              (() => {
+                const {
+                  naturalWidth,
+                  naturalHeight,
+                  renderedWidth,
+                  renderedHeight,
+                } = imageDimensions;
+                const scaleX = renderedWidth / naturalWidth;
+                const scaleY = renderedHeight / naturalHeight;
+                const scaledBbox = {
+                  left: currentDetection.bbox.x * scaleX,
+                  top: currentDetection.bbox.y * scaleY,
+                  width: currentDetection.bbox.width * scaleX,
+                  height: currentDetection.bbox.height * scaleY,
+                };
+
+                return (
+                  <div
+                    style={{
+                      position: "absolute",
+                      left: `${scaledBbox.left}px`,
+                      top: `${scaledBbox.top}px`,
+                      width: `${scaledBbox.width}px`,
+                      height: `${scaledBbox.height}px`,
+                      border: "3px solid #ff0000",
+                      backgroundColor: "rgba(255, 0, 0, 0.1)",
+                      pointerEvents: "none",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                );
+              })()}
           </div>
         )}
       </div>

@@ -194,6 +194,38 @@ async function dismissCookieOverlay(page: Page): Promise<void> {
   }
 }
 
+async function scrollToLoadContent(page: Page): Promise<void> {
+  try {
+    // Get page height and viewport height
+    const dimensions = await page.evaluate(() => ({
+      pageHeight: document.documentElement.scrollHeight,
+      viewportHeight: window.innerHeight,
+    }));
+
+    const scrollStep = Math.floor(dimensions.viewportHeight * 0.8);
+    let currentPosition = 0;
+
+    // Scroll down in steps to trigger lazy loading
+    while (currentPosition < dimensions.pageHeight) {
+      currentPosition += scrollStep;
+      await page.evaluate((y) => window.scrollTo(0, y), currentPosition);
+      await page.waitForTimeout(200); // Wait for lazy content to load
+    }
+
+    // Wait at bottom for any remaining content
+    await page.waitForTimeout(800);
+
+    // Scroll back to top for consistent screenshot starting position
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(500);
+
+    console.log(`    ✓ Scroll complete`);
+  } catch (error) {
+    console.warn(`    ⚠ Scroll warning:`, error);
+    // Non-fatal, continue with screenshot
+  }
+}
+
 async function getBoundingBox(
   page: Page,
   element: ElementHandle,
@@ -386,6 +418,9 @@ async function findComponentInstances(
       }
     }
 
+    // Sort by y-coordinate (top to bottom) for consistent numbering
+    deduped.sort((a, b) => a.y - b.y);
+
     // Limit to expected count
     const instances: FoundInstance[] = deduped
       .slice(0, expectedCount)
@@ -450,6 +485,10 @@ async function processUrl(browser: Browser, urlData: UrlData): Promise<void> {
 
     // Dismiss cookie overlay
     await dismissCookieOverlay(page);
+
+    // Scroll page to trigger lazy loading
+    console.log(`   🔃 Scrolling to trigger lazy loading...`);
+    await scrollToLoadContent(page);
 
     // Process each detection
     const manifestDetections: ManifestDetection[] = [];
