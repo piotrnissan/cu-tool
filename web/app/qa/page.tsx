@@ -514,18 +514,66 @@ export default function QAPage() {
         <h2 style={{ marginTop: 0, marginBottom: "1rem", fontSize: "1.1rem" }}>
           Preview
         </h2>
-        <div
-          style={{
-            border: "2px dashed #666",
-            borderRadius: "4px",
-            padding: "2rem",
-            textAlign: "center",
-            color: "inherit",
-            opacity: 0.6,
-          }}
-        >
-          <p>Screenshot preview will appear here in TH-33.</p>
-        </div>
+
+        {loading && (
+          <div
+            style={{
+              border: "2px dashed #666",
+              borderRadius: "4px",
+              padding: "2rem",
+              textAlign: "center",
+              color: "inherit",
+              opacity: 0.6,
+            }}
+          >
+            <p>Loading preview...</p>
+          </div>
+        )}
+
+        {!loading && error && (
+          <div
+            style={{
+              border: "2px dashed #666",
+              borderRadius: "4px",
+              padding: "2rem",
+              textAlign: "center",
+              color: "inherit",
+              opacity: 0.6,
+            }}
+          >
+            <p>Preview unavailable</p>
+          </div>
+        )}
+
+        {!loading && !error && !currentDetection && (
+          <div
+            style={{
+              border: "2px dashed #666",
+              borderRadius: "4px",
+              padding: "2rem",
+              textAlign: "center",
+              color: "inherit",
+              opacity: 0.6,
+            }}
+          >
+            <p>No detection selected</p>
+          </div>
+        )}
+
+        {!loading && !error && currentDetection && (
+          <div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={`/api/qa/screenshot?slug=${currentDetection.slug}`}
+              alt={`Annotated screenshot for ${currentDetection.slug}`}
+              style={{
+                maxWidth: "100%",
+                height: "auto",
+                display: "block",
+              }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
