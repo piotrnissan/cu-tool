@@ -7,9 +7,18 @@ export async function POST(request: NextRequest) {
     const payload = await request.json();
 
     // Validate required fields
-    if (!payload.timestamp || !payload.component_key || !payload.decision) {
+    if (
+      !payload.timestamp ||
+      !payload.detection_id ||
+      !payload.component_key ||
+      !payload.decision
+    ) {
       return NextResponse.json(
-        { ok: false, error: "Missing required fields" },
+        {
+          ok: false,
+          error:
+            "Missing required fields: timestamp, detection_id, component_key, decision",
+        },
         { status: 400 },
       );
     }
@@ -17,6 +26,7 @@ export async function POST(request: NextRequest) {
     // Build the JSONL record
     const record: Record<string, unknown> = {
       timestamp: payload.timestamp,
+      detection_id: payload.detection_id,
       page_url: payload.page_url || "unknown",
       component_key: payload.component_key,
       decision: payload.decision,
