@@ -74,7 +74,7 @@
 **Phase 6 starts only after Phase 5 DoD (TH-32.5).**
 
 - ✅ **TH-33**: Create `analysis/scripts/regression-check.ts` (Size: M, Risk: Low) — Done 2026-01-28
-- ☐ **TH-34**: Define impact-class quality gates (Class A: 90%, Class B: 85%, Class C: 80%) + minimum sample size rule (≥10 labels) (Size: M, Risk: Low)
+- ✅ **TH-34**: Define impact-class quality gates (Class A: 90%, Class B: 85%, Class C: 80%) + minimum sample size rule (≥10 labels) (Size: M, Risk: Low) — Done 2026-01-28
 - ☐ **TH-35**: Generate regression report (precision per component + pass/fail/insufficient) (Size: M, Risk: Low)
 - ☐ **TH-36**: Implement gate validator with sample size check (Size: S, Risk: Low)
 - ☐ **TH-37**: Document gates in `docs/visual-proof/quality-gates.md` (Size: S, Risk: Low)

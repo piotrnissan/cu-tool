@@ -1,0 +1,29 @@
+{
+  "version": "v1",
+  "min_sample_scored": 10,
+  "precision_denominator": ["correct", "wrong_type", "false_positive"],
+  "excluded_from_precision": ["unclear", "missing"],
+  "classes": {
+    "A": {
+      "min_precision": 0.9,
+      "components": ["accordion", "cards_section"]
+    },
+    "B": {
+      "min_precision": 0.85,
+      "components": ["image_carousel", "card_carousel"]
+    },
+    "C": {
+      "min_precision": 0.8,
+      "components": [
+        "hero",
+        "media_text_split",
+        "promo_section",
+        "info_specs",
+        "next_action_panel",
+        "tabs",
+        "anchor_nav"
+      ]
+    }
+  },
+  "status_if_insufficient": "insufficient_sample"
+}
