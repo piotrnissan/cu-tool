@@ -14,10 +14,34 @@
 
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { fileURLToPath } from "node:url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+/**
+ * Find repository root by walking up from startDir looking for package.json
+ * with name "cu-tool" (monorepo root, not workspace packages).
+ */
+function findRepoRoot(startDir: string): string {
+  let currentDir = startDir;
+
+  while (currentDir !== path.parse(currentDir).root) {
+    const packageJsonPath = path.join(currentDir, "package.json");
+    if (fs.existsSync(packageJsonPath)) {
+      try {
+        const pkg = JSON.parse(fs.readFileSync(packageJsonPath, "utf-8"));
+        if (pkg.name === "cu-tool") {
+          return currentDir;
+        }
+      } catch {
+        // Invalid package.json, continue searching
+      }
+    }
+    currentDir = path.dirname(currentDir);
+  }
+
+  console.error(
+    "ERROR: Could not find repository root (no package.json with name 'cu-tool' found)",
+  );
+  process.exit(1);
+}
 
 interface QALabel {
   timestamp: string;
@@ -55,8 +79,12 @@ interface RegressionReport {
   components: Record<string, ComponentMetrics>;
 }
 
-const LABELS_PATH = path.join(__dirname, "../qa-results/v1-uk/labels.jsonl");
-const OUTPUT_DIR = path.join(__dirname, "../artifacts/regression");
+const REPO_ROOT = findRepoRoot(process.cwd());
+const LABELS_PATH = path.join(
+  REPO_ROOT,
+  "analysis/qa-results/v1-uk/labels.jsonl",
+);
+const OUTPUT_DIR = path.join(REPO_ROOT, "analysis/artifacts/regression");
 const JSON_OUTPUT = path.join(OUTPUT_DIR, "regression-report.json");
 const MD_OUTPUT = path.join(OUTPUT_DIR, "regression-report.md");
 const MIN_SAMPLE_SIZE = 10;
@@ -217,8 +245,8 @@ function generateMarkdownReport(report: RegressionReport): string {
   md += `- **Components:** ${Object.keys(report.components).length}\n\n`;
 
   md += `## Per-Component Metrics\n\n`;
-  md += `| Component | Precision | Correct | Wrong type | False pos | Unclear | Missing | Scored | Status |\n`;
-  md += `|-----------|-----------|---------|------------|-----------|---------|---------|--------|--------|\n`;
+  md += `|Component|Precision|Correct|Wrong type|False pos|Unclear|Missing|Scored|Status|\n`;
+  md += `|---|---|---|---|---|---|---|---|---|\n`;
 
   // Sort by component key
   const sortedComponents = Object.entries(report.components).sort(([a], [b]) =>
@@ -231,7 +259,7 @@ function generateMarkdownReport(report: RegressionReport): string {
         ? (metrics.precision * 100).toFixed(1) + "%"
         : "n/a";
 
-    md += `| ${componentKey} | ${precisionStr} | ${metrics.correct} | ${metrics.wrong_type} | ${metrics.false_positive} | ${metrics.unclear} | ${metrics.missing} | ${metrics.scored} | ${metrics.status} |\n`;
+    md += `|${componentKey}|${precisionStr}|${metrics.correct}|${metrics.wrong_type}|${metrics.false_positive}|${metrics.unclear}|${metrics.missing}|${metrics.scored}|${metrics.status}|\n`;
   }
 
   return md;
