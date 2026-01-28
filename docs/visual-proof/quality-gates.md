@@ -1,338 +1,231 @@
-# Quality Gates Documentation
+# Quality Gates
 
-Quality gates are precision thresholds that must be met before running full UK analysis with hardened detectors. If any gate fails, detector fixes are required (return to Phase 4).
+Quality gates validate component detector precision before proceeding with broader analysis. This document describes the current regression harness implementation.
 
-**Threshold Philosophy**: These measure **detector precision**, not business importance. A component can be business-critical but tolerate 80% precision if false positives are easily identifiable. Gates are designed to block clearly broken detectors, not to over-optimize early.
+## Purpose
 
-**Minimum Sample Size**: Require ≥10 labeled detections per component to enforce gate. If sample size < 10, report "insufficient sample" (not pass/fail). Low-volume components may not have enough labels from 5 proof pages.
+Quality gates exist to:
 
----
+- Measure detector precision using human-labeled QA data
+- Block analysis when detectors produce unreliable results
+- Provide clear pass/fail/insufficient-sample signals for decision-making
 
-## Threshold Rationale (Impact Classes)
+Gates do NOT:
 
-**Why impact-class based thresholds?**
+- Judge business value or component importance
+- Auto-tune detectors
+- Block work when sample size is insufficient
 
-- **Class A (highest corruption risk)**: accordion ≥ 90%, cards_section ≥ 90%
-  - Accordion footer inflation (1,838 pages) and cards_section AEM grid confusion are highest-volume error sources
-  - These components have highest false-positive rates and distort analysis results most
-- **Class B (high visibility, subjective)**: image_carousel ≥ 85%, card_carousel ≥ 85%
-  - High visibility (hero sections, galleries) but slightly subjective classification
-  - Carousel split logic (image vs card) introduces misclassification risk
-- **Class C (lower volume or robust)**: hero ≥ 80%, media_text_split ≥ 80%, promo_section ≥ 80%, info_specs ≥ 80%, next_action_panel ≥ 80%, tabs ≥ 80%, anchor_nav ≥ 80%
-  - Lower volume components or more robust detection rules
-  - 80% threshold sufficient to block clearly broken detectors
+## Component Classes
 
-**Adjustability**: After first QA run, if a component fails gate by <5% (e.g., 83% vs 85% threshold), team may:
+Components are organized into three classes based on precision requirements:
 
-1. **Accept threshold miss** if false positives are low-impact (document decision in response.md)
-2. **Lower threshold by 5%** (e.g., 85% → 80%) and re-run QA on that component only
-3. **Fix detector and re-run full QA** (preferred)
+**Class A** (90% threshold)
 
----
+- Components with highest impact on analysis accuracy
 
-## Gate Definitions
+**Class B** (85% threshold)
 
-### Class A: Accordion & Cards Section (HIGHEST Priority)
+- High-visibility components with some classification subjectivity
 
-**Threshold**: Precision ≥ 90%
+**Class C** (80% threshold)
 
-**Rationale**: Accordion and cards_section have highest corruption risk. Accordion footer inflation affects 1,838 pages. Cards_section AEM grid confusion counts layout scaffolding as content components.
+- Lower-volume components or those with robust detection rules
 
-**Components**: `accordion`, `cards_section`
+Class membership for each component is defined in `analysis/config/quality-gates.v1.json`.
 
-**Minimum Sample**: ≥10 labels per component (if < 10, report "insufficient sample")
+## Precision Thresholds
 
-**Formula**:
+Each class has a minimum precision threshold:
+
+- **Class A**: 90%
+- **Class B**: 85%
+- **Class C**: 80%
+
+Precision is calculated as:
 
 ```text
-Precision = confirm_count / (confirm_count + wrong_count)
+precision = correct / (correct + wrong_type + false_positive)
 ```
 
-**Pass Example** (accordion):
+Where:
 
-- Confirmed: 27
-- Wrong: 2
-- Skipped: 1
-- Precision: 27 / (27 + 2) = 93.10% ✅ PASS
+- `correct`: Detection correctly identified
+- `wrong_type`: Detection is wrong component type
+- `false_positive`: Detection is not a component at all
+- `unclear` and `missing` labels are excluded from precision calculation
 
-**Fail Example** (cards_section):
+## Minimum Sample Rule
 
-- Confirmed: 18
-- Wrong: 5
-- Skipped: 2
-- Precision: 18 / (18 + 5) = 78.26% ❌ FAIL (below 90% threshold)
+Components must have **at least 10 scored labels** (`min_sample_scored = 10`) to be evaluated against thresholds.
 
-**Action if Failed**:
+Scored labels include: `correct`, `wrong_type`, `false_positive`
+Excluded labels: `unclear`, `missing`
 
-1. Review all `wrong` labels in labels.jsonl (filter by `component_key:"accordion"` or `component_key:"cards_section"` AND `label:"wrong"`)
-2. Identify common patterns:
-   - Accordion: Footer accordions, mobile footer chrome
-   - Cards_section: AEM grid wrappers, footer link sections, < 3 cards
-3. Update detector in `api/src/david-components.ts` (add exclusions, refine ≥3 cards logic)
-4. Re-run detector on 5 proof pages, re-export detections.json, re-run QA
-5. Repeat until precision ≥ 90%
+If a component has fewer than 10 scored labels:
 
----
+- Status: `insufficient_sample`
+- Precision: `null`
+- **This is NOT a failure**
 
-### Class B: Image Carousel & Card Carousel (HIGH Priority)
+Components without enough labels do not block progress. They are simply not evaluated.
 
-**Threshold**: Precision ≥ 85%
+## Gate Statuses
 
-**Rationale**: Carousels are high-visibility components (hero sections, editorial content). Carousel split logic (image vs card) introduces misclassification risk. Slightly lower threshold than Class A due to subjectivity.
+Each component receives one of three statuses:
 
-**Components**: `image_carousel`, `card_carousel`
+**`pass`**
 
-**Minimum Sample**: ≥10 labels per component
+- Component has ≥10 scored labels
+- Precision meets or exceeds class threshold
+- No action required
 
-**Formula**: Same as Class A
+**`fail`**
 
-**Common Failure Modes**:
+- Component has ≥10 scored labels
+- Precision is below class threshold
+- Detector corrections required before proceeding
 
-- Misclassified as opposite type (split logic bug: ≥1 heading → card, ≥1 image → image)
-- Footer link sections with prev/next buttons detected as carousels
-- Non-carousel grid layouts with swiper classes (static, no scrolling)
-- Mega-nav dropdowns with carousel-like structure
-- Nested carousel inside media_text_split counted twice (should be media_text_split with media_type=carousel)
+**`insufficient_sample`**
 
-**Action if Failed**:
+- Component has <10 scored labels
+- Precision cannot be reliably calculated
+- Does NOT block progress
 
-1. Review `wrong` labels for image_carousel and card_carousel
-2. Check carousel split logic (≥1 heading → card, ≥1 image → image)
-3. Verify controls detection (prev/next buttons should NOT auto-trigger carousel classification)
-4. Check nested carousel no-double-count rule (carousel inside media_text_split)
-5. Update detector, re-run QA
+Class-level status:
 
----
+- `fail` if any component in class fails
+- `insufficient_sample` if no failures but at least one component has insufficient sample
+- `pass` if all components with sufficient samples pass
 
-### Class C: Remaining Components (MEDIUM Priority)
+Overall status:
 
-**Threshold**: Precision ≥ 80%
+- `fail` if any class fails
+- `insufficient_sample` if no failures but at least one class has insufficient sample
+- `pass` if all classes pass
 
-**Combined Gate**: hero, media_text_split, promo_section, info_specs, next_action_panel, tabs, anchor_nav must ALL meet threshold.
+## End-to-End Workflow
 
-**Rationale**: Lower volume components or more robust detection. 80% threshold sufficient to block clearly broken detectors. Combined gate reduces QA burden.
+### 1. Human QA Labels
 
-**Components**: `hero`, `media_text_split`, `promo_section`, `info_specs`, `next_action_panel`, `tabs`, `anchor_nav`
+Operator reviews detections in web UI (`/qa`) and labels each:
 
-**Minimum Sample**: ≥10 labels per component (some components may have insufficient sample from 5 proof pages)
+- `correct` / `wrong_type` / `false_positive` / `unclear` / `missing`
 
-**Critical Rules**:
+Labels written to: `analysis/qa-results/v1-uk/labels.jsonl`
 
-- **Hero vs promo**: Only top-of-page hero is `hero`. Hero-like blocks lower in page are `promo_section` or `media_text_split`.
-- **Media_text_split nested carousel**: If carousel exists within media_text_split, classify as media_text_split with media_type=carousel (NOT standalone carousel).
-- **Tabs mega-nav exclusion**: Global mega-nav tabs are NOT content tabs.
-- **Anchor_nav content flow**: In-page navigation must be in content flow (exclude header/footer nav).
+### 2. Regression Check (`regression-check.ts`)
 
-**Common Failure Modes**:
+Reads labels.jsonl and computes per-component metrics:
 
-- Hero misclassified as promo_section (or vice versa)
-- Media_text_split with nested carousel counted twice
-- Tabs in mega-nav counted as content tabs
-- Info_specs confused with next_action_panel
-- Anchor_nav in header/footer counted as content nav
+- Total labels
+- Scored count
+- Label breakdowns (correct, wrong_type, false_positive, unclear, missing)
+- Precision (if scored ≥ 10)
+- Status (pass/fail/insufficient_sample)
 
-**Action if Failed**:
+Outputs:
 
-1. Review `wrong` labels for failed component(s)
-2. Check critical rules (hero vs promo, nested carousel, mega-nav exclusion)
-3. Update detector, re-run QA
+- `analysis/artifacts/regression/regression-report.json`
+- Console summary
 
----
+### 3. Gate Report (`gate-report.ts`)
 
-## Precision Formula Details
+Reads regression-report.json and quality-gates.v1.json, then:
 
-### Included in Denominator
+- Computes gate status for each component
+- Handles missing components (treats as scored=0, insufficient_sample)
+- Computes per-class and overall status
 
-- **Confirm**: Detection is correct (true positive)
-- **Wrong**: Detection is incorrect (false positive)
+Outputs:
 
-### Excluded from Denominator
+- `analysis/artifacts/regression/gate-report.json`
+- `analysis/artifacts/regression/gate-report.md`
+- Console summary
 
-- **Skip**: Operator uncertain, not counted as confirm or wrong
+### 4. Gate Validation (`gate-validate.ts`)
 
-**Rationale**: Skips indicate edge cases or ambiguous classifications. Excluding them from precision avoids penalizing detectors for subjective cases.
+Reads gate-report.json and exits with status code:
 
-### Example Calculation
+- **Exit 0**: Overall status = `pass`
+- **Exit 1**: Overall status = `fail`
+- **Exit 2**: Overall status = `insufficient_sample`
 
-labels.jsonl (filtered to `component_key:"image_carousel"`):
+Used in CI or decision pipelines.
 
-```jsonl
-{"label":"confirm"}  // 1
-{"label":"confirm"}  // 2
-{"label":"wrong"}    // 3
-{"label":"skip"}     // (not counted)
-{"label":"confirm"}  // 4
-{"label":"wrong"}    // 5
-{"label":"confirm"}  // 6
+## How to Interpret Results
+
+### All Pass
+
+All components with sufficient samples meet their thresholds. Proceed with confidence.
+
+### Some Fail
+
+One or more components do not meet precision requirements:
+
+1. Review failed component labels in labels.jsonl
+2. Identify patterns (common false positives, wrong classifications)
+3. Update detector logic in `api/src/david-components.ts`
+4. Re-run detector, re-export detections, re-run QA
+5. Repeat until gates pass
+
+Do NOT proceed with full analysis until failures are resolved.
+
+### Some/All Insufficient Sample
+
+Not enough labels to evaluate precision. This does NOT block work:
+
+- If overall status is `insufficient_sample` (no failures), you can proceed
+- Components with insufficient samples are not evaluated
+- Consider adding more QA pages or spot-checking components manually
+
+Exit code 2 signals "not enough data" rather than "blocked."
+
+## Explicit Non-Goals
+
+**Gates do NOT judge business value**
+A high-precision detector is not necessarily more important. Gates only measure technical accuracy.
+
+**Gates do NOT auto-tune detectors**
+Human review and manual detector updates are required. Gates provide measurement, not automation.
+
+**Gates do NOT block work when sample size is insufficient**
+Exit code 2 indicates "not enough data" and is distinct from "fail." Insufficient sample is informational, not blocking.
+
+## Configuration Reference
+
+**File**: `analysis/config/quality-gates.v1.json`
+
+```json
+{
+  "version": "v1",
+  "min_sample_scored": 10,
+  "precision_denominator": ["correct", "wrong_type", "false_positive"],
+  "excluded_from_precision": ["unclear", "missing"],
+  "classes": {
+    "A": {
+      "min_precision": 0.9,
+      "components": ["accordion", "cards_section"]
+    },
+    "B": {
+      "min_precision": 0.85,
+      "components": ["image_carousel", "card_carousel"]
+    },
+    "C": {
+      "min_precision": 0.8,
+      "components": [
+        "hero",
+        "media_text_split",
+        "promo_section",
+        "info_specs",
+        "next_action_panel",
+        "tabs",
+        "anchor_nav"
+      ]
+    }
+  }
+}
 ```
-
-Counts:
-
-- Confirm: 4
-- Wrong: 2
-- Skip: 1 (ignored)
-
-Precision: 4 / (4 + 2) = 66.67%
-
----
-
-## Gate Validation Script
-
-**File**: `analysis/scripts/regression-check.ts`
-
-**Input**: `analysis/artifacts/visual-proof/labels.jsonl`
-
-**Output**:
-
-- Console: Pass/fail per gate with actual vs threshold
-- File: `analysis/artifacts/visual-proof/regression-report.md`
-- Exit code: 0 (all pass) or 1 (any fail)
-
-### Example Console Output
-
-```text
-========================================
-Quality Gate Validation
-========================================
-
-Class A: Accordion & Cards Section (threshold: 90%)
-  accordion:
-    Confirm: 27
-    Wrong:   2
-    Skip:    1
-    Precision: 93.10%
-    ✅ PASS
-  cards_section:
-    Confirm: 18
-    Wrong:   5
-    Skip:    2
-    Precision: 78.26%
-    ❌ FAIL (below 90% threshold)
-  Class A Result: ❌ FAIL
-
-Class B: Image Carousel & Card Carousel (threshold: 85%)
-  image_carousel:
-    Confirm: 45
-    Wrong:   3
-    Skip:    2
-    Precision: 93.75%
-    ✅ PASS
-  card_carousel:
-    Confirm: 38
-    Wrong:   4
-    Skip:    3
-    Precision: 90.48%
-    ✅ PASS
-  Class B Result: ✅ PASS
-
-Class C: Remaining Components (threshold: 80%)
-  hero:
-    Confirm: 4
-    Wrong:   1
-    Precision: 80.00%
-    ✅ PASS
-  media_text_split:
-    Sample size: 8 labels
-    ⚠️ INSUFFICIENT SAMPLE (need ≥10)
-  promo_section:
-    Sample size: 5 labels
-    ⚠️ INSUFFICIENT SAMPLE (need ≥10)
-  tabs:
-    Confirm: 12
-    Wrong:   2
-    Precision: 85.71%
-    ✅ PASS
-  anchor_nav:
-    Sample size: 3 labels
-    ⚠️ INSUFFICIENT SAMPLE (need ≥10)
-  Class C Result: ✅ PASS (evaluated components meet threshold)
-
-========================================
-Result: 2 of 3 impact classes passed
-❌ ANALYSIS BLOCKED (Class A failed: cards_section precision 78.26% < 90%)
-========================================
-```
-
-### Example Regression Report (regression-report.md)
-
-```markdown
-# Regression Report
-
-**Generated**: 2026-01-20 15:45:10  
-**Labels Source**: analysis/artifacts/visual-proof/labels.jsonl
-
----
-
-## Summary
-
-| Gate | Component(s)                                      | Threshold | Actual              | Status  |
-| ---- | ------------------------------------------------- | --------- | ------------------- | ------- |
-| A    | accordion, cards_section                          | 90%       | 93.10%, 91.30%      | ✅ PASS |
-| B    | image_carousel, card_carousel                     | 85%       | 93.75%, 87.50%      | ✅ PASS |
-| C    | hero, media_text_split, promo_section, tabs, etc. | 80%       | 85.71%, 88.89%, ... | ✅ PASS |
-
-**Result**: 3 of 3 gates passed  
-**Analysis Status**: ✅ APPROVED
-
----
-
-## Class B Failure Analysis
-
-**Component**: card_carousel  
-**Precision**: 82.61% (below Class B threshold of 85%)
-
-**Label Breakdown**:
-
-- Confirm: 38
-- Wrong: 8
-- Skip: 4
-
-**Common Wrong Patterns** (from labels.jsonl):
-
-1. Footer link sections with prev/next buttons (4 instances)
-2. Static grid layouts with swiper classes but no scrolling (2 instances)
-3. Misclassified image carousels (heading detected but primarily images) (2 instances)
-
-**Recommended Fixes**:
-
-1. Exclude `[role="contentinfo"]` from card carousel detection
-2. Verify controls are functional (not just decorative buttons)
-3. Adjust carousel split logic: Require ≥2 headings (not just ≥1) for card classification
-
----
-
-## Next Steps
-
-1. Review detector code in `api/src/david-components.ts`
-2. Apply recommended fixes
-3. Re-run detector on 5 proof pages
-4. Re-export detections.json
-5. Re-run QA (only on card_carousel detections to save time)
-6. Re-run regression-check.ts
-7. Repeat until all gates pass
-```
-
----
-
-## Blockers & Overrides
-
-### Critical Blocker
-
-If **any gate fails**, full UK analysis is blocked. Exit script with code 1, show error message.
-
-**Rationale**: Running full analysis with low-precision detectors wastes compute time and produces unreliable data.
-
-### Override (Manual)
-
-If operator decides to proceed despite gate failure (e.g., known issue, low business impact):
-
-1. Document decision in `.github/response.md` (rationale + risks)
-2. Add `--force` flag to analysis command
-3. Run analysis with warning banner
-
-**NOT RECOMMENDED** for POC. Gates exist to maintain data quality.
-
----
 
 ## Related Documentation
 
