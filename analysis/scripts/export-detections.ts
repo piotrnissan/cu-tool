@@ -235,13 +235,52 @@ function fetchDetectionsForUrl(
     );
   }
 
-  const detections: Detection[] = rows.map((row) => ({
-    component_key: row.component_key,
-    instance_count: row.instance_count,
-    confidence: row.confidence,
-    evidence_raw: row.evidence,
-    evidence_parsed: parseEvidence(row.component_key, row.evidence),
-  }));
+  // Step 3: Aggregate rows by component_key
+  // This prevents per-row spam (e.g., promo_section with 100+ individual rows)
+  const aggregated = new Map<
+    string,
+    {
+      component_key: string;
+      instance_count: number;
+      confidence: string | null;
+      evidence_samples: string[];
+    }
+  >();
+
+  for (const row of rows) {
+    const existing = aggregated.get(row.component_key);
+    if (existing) {
+      // Aggregate: sum instance counts
+      existing.instance_count += row.instance_count;
+      // Collect evidence samples (up to 3 for brevity)
+      if (row.evidence && existing.evidence_samples.length < 3) {
+        existing.evidence_samples.push(row.evidence);
+      }
+    } else {
+      // First occurrence of this component_key
+      aggregated.set(row.component_key, {
+        component_key: row.component_key,
+        instance_count: row.instance_count,
+        confidence: row.confidence,
+        evidence_samples: row.evidence ? [row.evidence] : [],
+      });
+    }
+  }
+
+  // Step 4: Build detections from aggregated data
+  const detections: Detection[] = Array.from(aggregated.values()).map((agg) => {
+    // Concatenate evidence samples for reference
+    const evidence_raw =
+      agg.evidence_samples.length > 0 ? agg.evidence_samples.join(" | ") : null;
+
+    return {
+      component_key: agg.component_key,
+      instance_count: agg.instance_count,
+      confidence: agg.confidence,
+      evidence_raw,
+      evidence_parsed: parseEvidence(agg.component_key, evidence_raw),
+    };
+  });
 
   return { urlId, detections };
 }
