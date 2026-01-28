@@ -73,7 +73,7 @@
 
 **Phase 6 starts only after Phase 5 DoD (TH-32.5).**
 
-- ☐ **TH-33**: Create `analysis/scripts/regression-check.ts` (Size: M, Risk: Low)
+- ✅ **TH-33**: Create `analysis/scripts/regression-check.ts` (Size: M, Risk: Low) — Done 2026-01-28
 - ☐ **TH-34**: Define impact-class quality gates (Class A: 90%, Class B: 85%, Class C: 80%) + minimum sample size rule (≥10 labels) (Size: M, Risk: Low)
 - ☐ **TH-35**: Generate regression report (precision per component + pass/fail/insufficient) (Size: M, Risk: Low)
 - ☐ **TH-36**: Implement gate validator with sample size check (Size: S, Risk: Low)
@@ -101,8 +101,8 @@
 
 **Total tasks**: 46 (+ 3 quality gate classes)
 **Sprints**: 3
-**Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 Phase 4 complete (TH-14 to TH-25), Sprint 2 Phase 5 complete (Human QA complete, labels.jsonl ready)
-**Next step**: TH-33
+**Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 Phase 4 complete (TH-14 to TH-25), Sprint 2 Phase 5 complete (Human QA complete, labels.jsonl ready), Sprint 3 Phase 6 in progress
+**Next step**: TH-34
 
 - Sprint 1: TH-01 to TH-13 (13 tasks, S/M risk, 2-3 days)
 - Sprint 2: TH-14 to TH-32.5 (23 tasks, M/L risk, 4-5 days)
