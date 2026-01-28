@@ -89,6 +89,19 @@
 
 ---
 
+## Sprint 4: Section-first QA (Design POV) (L, 3-5 days)
+
+### Phase 8: Section-first Segmentation + QA
+
+- ☐ **TH-43**: Define Section data contract + documentation (docs/visual-proof/sections.md) (Size: M, Risk: Medium)
+  - The section candidate contract MUST include `background_kind` (enum): solid_light | solid_dark | gradient | image | video | mixed | unknown
+  - Do NOT include `dominant_bg` or `has_large_image` in the planned contract (we are replacing them with background_kind).
+- ☐ **TH-44**: Add API route to serve section queue (Size: M, Risk: Medium)
+- ☐ **TH-45**: Update QA UI to label sections (section_id + bbox-based review) (Size: L, Risk: Medium)
+- ☐ **TH-46**: Implement heuristic section candidate generation (full-width segmentation) (Size: L, Risk: High)
+
+---
+
 ## Quality Gates (explicit tasks)
 
 - ☐ **QG-01**: Class A Pass (accordion ≥ 90%, cards_section ≥ 90%) (Size: QA, Risk: High)
@@ -99,14 +112,15 @@
 
 ## Summary
 
-**Total tasks**: 46 (+ 3 quality gate classes)
-**Sprints**: 3
+**Total tasks**: 50 (+ 3 quality gate classes)
+**Sprints**: 4
 **Current status**: Sprint 1 complete (TH-01 to TH-13), Sprint 2 Phase 4 complete (TH-14 to TH-25), Sprint 2 Phase 5 complete (Human QA complete, labels.jsonl ready), Sprint 3 Phase 6 complete
 **Next step**: TH-38
 
 - Sprint 1: TH-01 to TH-13 (13 tasks, S/M risk, 2-3 days)
 - Sprint 2: TH-14 to TH-32.5 (23 tasks, M/L risk, 4-5 days)
 - Sprint 3: TH-33 to TH-42 (10 tasks, M risk, 2-3 days)
+- Sprint 4: TH-43 to TH-46 (4 tasks, L risk, 3-5 days) — Planned, not started
 
 ---
 
