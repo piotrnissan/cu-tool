@@ -1,6 +1,17 @@
 # Editorial — Selected for Visual Proof Pack
 # Selection rule: Non-VLP pages (exclude homepage, exclude /vehicles/new-vehicles, exclude micra/leaf hosts)
-# Count: 2-3 pages
+# Count: 13 pages
 
 https://www.nissan.co.uk/experience-nissan/electric-vehicles.html
 https://www.nissan.co.uk/owners.html
+https://www.nissan.co.uk/vehicles/cars-for-sale.html
+https://www.nissan.co.uk/fleet-cars/fleet-car-solutions.html
+https://www.nissan.co.uk/range/vans-trucks.html
+https://www.nissan.co.uk/range/e-power-cars.html
+https://www.nissan.co.uk/experience-nissan/electric-vehicle-leadership/storage-solutions.html
+https://www.nissan.co.uk/experience-nissan/electric-vehicle-leadership/nissan-charge.html
+https://www.nissan.co.uk/owners/car-repair/car-servicing.html
+https://www.nissan.co.uk/owners/car-accessories.html
+https://www.nissan.co.uk/owners/car-accessories/browse-accessories.html
+https://www.nissan.co.uk/owners/car-warranty.html
+https://www.nissan.co.uk/experience-nissan/nissan-by-britain.html
